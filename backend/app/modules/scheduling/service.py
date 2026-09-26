@@ -10,7 +10,7 @@ from app.core.timezone import local_today
 from app.modules.bookings.models import Booking
 from app.modules.bookings.repository import BookingRepository
 from app.modules.catalog.repository import CatalogRepository
-from app.modules.providers.models import Provider
+from app.modules.providers.lookup import find_provider
 from app.modules.providers.repository import ProviderRepository
 from app.modules.scheduling.day import load_provider_day, schedule_rules, search_range
 from app.modules.scheduling.domain import TimeRange, compute_slots, fits_weekly_hours
@@ -39,13 +39,13 @@ class ScheduleService:
         self.bookings = BookingRepository(db)
 
     def get_availability(self, provider_id: uuid.UUID) -> list[AvailabilityWindow]:
-        self._active_provider(provider_id)
+        find_provider(self.providers, provider_id, active_only=True)
         return self.schedule.windows(provider_id)
 
     def replace_availability(
         self, provider_id: uuid.UUID, windows: list[WindowIn]
     ) -> list[AvailabilityWindow]:
-        self._locked_provider(provider_id)
+        self._lock_provider(provider_id)
         weekly = [(window.weekday, window.start_time, window.end_time) for window in windows]
         orphaned = [
             booking
@@ -72,11 +72,11 @@ class ScheduleService:
         return self.schedule.windows(provider_id)
 
     def list_time_off(self, provider_id: uuid.UUID) -> list[TimeOff]:
-        self._provider(provider_id)
+        find_provider(self.providers, provider_id, active_only=False)
         return self.schedule.upcoming_time_off(provider_id, self.clock.now())
 
     def add_time_off(self, provider_id: uuid.UUID, data: TimeOffCreate) -> TimeOff:
-        self._locked_provider(provider_id)
+        self._lock_provider(provider_id)
         if data.ends_at <= self.clock.now():
             raise UnprocessableError("Time off must end in the future.", code="TIME_OFF_IN_PAST")
         overlapping = self.bookings.active_for_provider_between(
@@ -95,7 +95,7 @@ class ScheduleService:
         return time_off
 
     def delete_time_off(self, provider_id: uuid.UUID, time_off_id: uuid.UUID) -> None:
-        self._locked_provider(provider_id)
+        self._lock_provider(provider_id)
         time_off = self.schedule.get_time_off(provider_id, time_off_id)
         if time_off is None:
             raise NotFoundError("Time off not found.")
@@ -105,7 +105,7 @@ class ScheduleService:
     def get_slots(
         self, provider_id: uuid.UUID, service_id: uuid.UUID, day: date
     ) -> list[TimeRange]:
-        provider = self._active_provider(provider_id)
+        provider = find_provider(self.providers, provider_id, active_only=True)
         service = self.catalog.get(service_id)
         if service is None or not service.is_active:
             raise NotFoundError("Service not found.")
@@ -131,20 +131,5 @@ class ScheduleService:
             now=now,
         )
 
-    def _provider(self, provider_id: uuid.UUID) -> Provider:
-        provider = self.providers.get(provider_id)
-        if provider is None:
-            raise NotFoundError("Provider not found.")
-        return provider
-
-    def _active_provider(self, provider_id: uuid.UUID) -> Provider:
-        provider = self.providers.get(provider_id)
-        if provider is None or not provider.is_active:
-            raise NotFoundError("Provider not found.")
-        return provider
-
-    def _locked_provider(self, provider_id: uuid.UUID) -> Provider:
-        provider = self.providers.lock(provider_id)
-        if provider is None:
-            raise NotFoundError("Provider not found.")
-        return provider
+    def _lock_provider(self, provider_id: uuid.UUID) -> None:
+        find_provider(self.providers, provider_id, active_only=False, lock=True)

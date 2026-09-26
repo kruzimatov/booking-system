@@ -45,13 +45,14 @@ Requirements: Docker with Compose, `make` and `openssl` (standard on macOS and L
 git clone https://github.com/kruzimatov/booking-system.git
 cd booking-system
 make env   # creates .env with a random JWT secret
-make up    # builds and starts database, API and web app, then loads demo data
+make up    # builds and starts database, API and web app
+make demo  # loads the demo shop (replaces all data)
 ```
 
 - App: http://localhost:8081
 - API documentation (Swagger): http://localhost:8081/api/docs
 
-Demo accounts created by the seed script:
+Demo accounts created by the seed script on your machine (local only: the seed script refuses these passwords on an HTTPS deployment, where `SEED_ADMIN_PASSWORD` and `SEED_CLIENT_PASSWORD` must be set):
 
 | Role | Email | Password |
 |---|---|---|
@@ -188,7 +189,7 @@ curl -b jar -X POST localhost:8081/api/v1/bookings -H 'Content-Type: application
 make dev-db && make test
 ```
 
-- 134 backend tests: unit tests for the pure rules, API tests for every endpoint, and concurrency tests with real parallel transactions.
+- 141 backend tests: unit tests for the pure rules, API tests for every endpoint, and concurrency tests with real parallel transactions.
 - Tests run the real migrations on a separate `booking_test` database, so the database constraints are tested too.
 - Time is controlled with an injected clock, so rules like "2 hours before" and "after the end" are tested exactly.
 - Coverage: 98% of backend lines. The slot engine and the status rules are at 100%.
@@ -202,15 +203,17 @@ make dev-db && make test
 - The JWT algorithm is pinned; unsigned or foreign tokens are rejected. The app refuses to start without a strong secret.
 - Request schemas reject unknown fields, so nobody can register as an admin or send their own price or status.
 - Clients never see another client's data; a foreign booking returns 404. Specialists' contact details are admin-only.
-- nginx sets a Content Security Policy and other security headers, and rate-limits login (10 per minute) and the API.
+- nginx sets a Content Security Policy and other security headers, and rate-limits login and registration (10 per minute) and the API.
+- State-changing requests from another origin are rejected (`403 CROSS_ORIGIN_REQUEST`), which also covers sibling subdomains that `SameSite` cookies do not.
+- An expired login is detected everywhere at once: any `401` logs the user out in the app and guarded pages send them to the login page.
 - The API container runs as a non-root user; database and app ports are bound to localhost only.
 
 ## Deployment
 
 The app runs on any Linux server with Docker. A host nginx terminates HTTPS and forwards to the `web` container:
 
-1. Point a DNS record at the server, clone the repository, run `make env`, then edit `.env`: set `ENV=prod`, `COOKIE_SECURE=true` and a strong `POSTGRES_PASSWORD`.
-2. `docker compose up -d --build --wait`, then create an admin with `docker compose exec api python -m scripts.create_admin` (or load demo data with the seed script).
+1. Point a DNS record at the server, clone the repository, run `make env`, then edit `.env`: set `COOKIE_SECURE=true`, a strong `POSTGRES_PASSWORD`, and (for a demo) private `SEED_ADMIN_PASSWORD` and `SEED_CLIENT_PASSWORD`.
+2. `make up`, then either create an admin with `docker compose exec api python -m scripts.create_admin`, or load the demo shop with `make demo`.
 3. Add the host nginx site from [deploy/nginx-host.conf](deploy/nginx-host.conf) and enable HTTPS with `certbot --nginx`.
 4. Schedule a daily database backup, for example: `docker compose exec -T db pg_dump -U booking booking | gzip > backup-$(date +%F).sql.gz`.
 

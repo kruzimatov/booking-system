@@ -3,9 +3,10 @@ import uuid
 from sqlalchemy.orm import Session
 
 from app.core.clock import Clock
-from app.core.errors import ConflictError, NotFoundError, UnprocessableError
+from app.core.errors import ConflictError, UnprocessableError
 from app.modules.bookings.repository import BookingRepository
 from app.modules.catalog.repository import CatalogRepository
+from app.modules.providers.lookup import find_provider
 from app.modules.providers.models import Provider
 from app.modules.providers.repository import ProviderRepository
 from app.modules.providers.schemas import ProviderCreate, ProviderUpdate
@@ -26,16 +27,10 @@ class ProviderService:
         return self.providers.list_providers(active_only=False)
 
     def get_active(self, provider_id: uuid.UUID) -> Provider:
-        provider = self.providers.get(provider_id)
-        if provider is None or not provider.is_active:
-            raise NotFoundError("Provider not found.")
-        return provider
+        return find_provider(self.providers, provider_id, active_only=True)
 
     def get(self, provider_id: uuid.UUID) -> Provider:
-        provider = self.providers.get(provider_id)
-        if provider is None:
-            raise NotFoundError("Provider not found.")
-        return provider
+        return find_provider(self.providers, provider_id, active_only=False)
 
     def create(self, data: ProviderCreate) -> Provider:
         provider = Provider(**data.model_dump())
@@ -61,8 +56,7 @@ class ProviderService:
 
     def _ensure_can_deactivate(self, provider_id: uuid.UUID) -> None:
         # PATCH is_active=false and DELETE both land here, under the provider lock.
-        if self.providers.lock(provider_id) is None:
-            raise NotFoundError("Provider not found.")
+        find_provider(self.providers, provider_id, active_only=False, lock=True)
         upcoming = self.bookings.future_active_for_provider(provider_id, self.clock.now())
         if upcoming:
             raise ConflictError(

@@ -5,8 +5,13 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, SmallIntege
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.base import Base, UUIDPrimaryKey
+from app.modules.catalog.models import DURATION_STEP_MINUTES
 
-ON_GRID = "mod(extract(minute from {column})::int, 15) = 0 AND extract(second from {column}) = 0"
+ON_GRID = (
+    "mod(extract(minute from {column})::int, "
+    + str(DURATION_STEP_MINUTES)
+    + ") = 0 AND extract(second from {column}) = 0"
+)
 
 
 class AvailabilityWindow(UUIDPrimaryKey, Base):

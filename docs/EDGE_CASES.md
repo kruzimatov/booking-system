@@ -35,6 +35,7 @@ Every case below is handled in code and covered by a test (test files are under 
 | Time without an offset (`2030-01-07T10:00`) | `422`: ambiguous times are refused | `test_naive_start_time_is_rejected` |
 | Late evening: UTC is still "yesterday" when Tashkent is already "today" | The business date is used | `test_business_today_rolls_over_before_utc_midnight` |
 | Slots requested for a past date or beyond the horizon | `422 DATE_OUT_OF_RANGE` | `test_dates_outside_the_booking_window_are_rejected` |
+| Absurd years (`9999-12-31T23:45-12:00`), which would overflow date arithmetic | `422` before any calculation, for bookings, time off, slots and admin filters | `test_absurd_years_are_rejected_before_any_date_arithmetic`, `test_slots_reject_absurd_dates`, `test_date_filters_reject_absurd_years` |
 
 ## Data integrity
 
@@ -74,12 +75,16 @@ Every case below is handled in code and covered by a test (test files are under 
 | Client reads another client's booking | `404` (existence not revealed) | `test_booking_visibility` |
 | Public views of specialists | Email and phone are never included | `test_admin_creates_provider_and_public_view_hides_contacts` |
 | Unexpected server error | `500` with a generic message; no internal details | `test_unexpected_error_hides_internal_details` |
+| A POST from another website or sibling subdomain, using the victim's cookie | `403 CROSS_ORIGIN_REQUEST` | `test_state_changing_requests_from_another_origin_are_rejected` |
+| Stats requested with only an end date | Starts at the first day of that month | `test_stats_with_only_an_end_date_use_that_month` |
 
 ## Checked manually
 
 | Case | Result |
 |---|---|
 | Login brute force through nginx | After 10 quick attempts, `429 RATE_LIMITED` in the standard error format |
+| Many page loads from one shared IP | `/auth/me` is not under the strict login limit, so users behind mobile carrier NAT are not logged out |
+| Login expires while the app is open | Any `401` marks the user as logged out; guarded pages go to the login page |
 | A slot is taken while the user is on the confirm step | A message, fresh times, and the user stays on the time step (browser check) |
 | Refresh or log in in the middle of booking | The selection is kept in the URL (browser check) |
 | Phone-width screen (375px) | No horizontal scrolling (browser check) |

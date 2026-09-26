@@ -28,6 +28,7 @@ from app.modules.bookings.policies import (
 from app.modules.bookings.repository import BookingRepository
 from app.modules.bookings.schemas import BookingCreate
 from app.modules.catalog.repository import CatalogRepository
+from app.modules.providers.lookup import find_provider
 from app.modules.providers.repository import ProviderRepository
 from app.modules.scheduling.day import load_provider_day, schedule_rules, search_range
 from app.modules.scheduling.domain import SlotRejection, TimeRange, check_start
@@ -84,9 +85,7 @@ class BookingService:
         # The user lock serializes one client's bookings (limit and self-overlap checks);
         # the provider lock serializes everything that changes that provider's schedule.
         self.users.lock(client.id)
-        provider = self.providers.lock(data.provider_id)
-        if provider is None or not provider.is_active:
-            raise NotFoundError("Provider not found.")
+        provider = find_provider(self.providers, data.provider_id, active_only=True, lock=True)
         service = self.catalog.get(data.service_id)
         if service is None or not service.is_active:
             raise NotFoundError("Service not found.")

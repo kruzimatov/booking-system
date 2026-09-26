@@ -1,7 +1,6 @@
 import os
 
 # Must run before the app is imported: the engine is created at import time.
-os.environ["ENV"] = "test"
 os.environ["DATABASE_URL"] = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+psycopg://booking:booking@localhost:5433/booking_test"
 )
