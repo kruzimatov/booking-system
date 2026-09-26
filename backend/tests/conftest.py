@@ -23,7 +23,8 @@ from app.core.clock import get_clock
 from app.core.db import SessionLocal, engine
 from app.main import create_app
 from app.models import Base
-from tests.support import FrozenClock
+from app.modules.users.models import UserRole
+from tests.support import FrozenClock, bearer_headers, make_user
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -69,3 +70,14 @@ def api_app(clock: FrozenClock) -> FastAPI:
 def client(api_app: FastAPI) -> Iterator[TestClient]:
     with TestClient(api_app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def admin_headers(db: Session, clock: FrozenClock) -> dict[str, str]:
+    admin = make_user(db, email="admin@example.com", role=UserRole.ADMIN)
+    return bearer_headers(admin, clock)
+
+
+@pytest.fixture
+def client_headers(db: Session, clock: FrozenClock) -> dict[str, str]:
+    return bearer_headers(make_user(db, email="client@example.com"), clock)

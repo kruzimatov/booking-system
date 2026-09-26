@@ -501,6 +501,8 @@ Validation errors: `code = "VALIDATION_ERROR"`, `details.fields = {"body.starts_
 
 ### Catalog (services)
 
+> Implemented as: public reads at `/services`, all admin operations at `/admin/services` (same for providers at `/admin/providers`). Separate paths keep one response shape per endpoint, so the generated frontend types stay simple.
+
 | Method | Path | Access | Notes |
 |---|---|---|---|
 | GET | `/services` | public | Active only. Admin: `?include_inactive=true` |

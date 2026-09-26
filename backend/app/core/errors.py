@@ -43,10 +43,22 @@ class ForbiddenError(AppError):
     message = "You do not have permission to do this."
 
 
+class NotFoundError(AppError):
+    status_code = 404
+    code = "NOT_FOUND"
+    message = "Resource not found."
+
+
 class ConflictError(AppError):
     status_code = 409
     code = "CONFLICT"
     message = "The request conflicts with the current state."
+
+
+class UnprocessableError(AppError):
+    status_code = 422
+    code = "UNPROCESSABLE"
+    message = "The request cannot be processed."
 
 
 # Constraint name (see core/base.py naming convention) -> error raised to the client.
