@@ -42,7 +42,11 @@ class PatchSchema(RequestSchema):
 
 
 class ResponseSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    # Fields with defaults are still always present in responses, so mark them required in
+    # the OpenAPI schema; the generated TypeScript types then need no undefined checks.
+    model_config = ConfigDict(
+        from_attributes=True, json_schema_serialization_defaults_required=True
+    )
 
 
 class Page[ItemT](BaseModel):
