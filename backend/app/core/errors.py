@@ -66,6 +66,12 @@ _CONSTRAINT_ERRORS: dict[str, Callable[[], AppError]] = {
     "uq_users_email": lambda: ConflictError(
         "This email is already registered.", code="EMAIL_TAKEN"
     ),
+    "ex_bookings_provider_overlap": lambda: ConflictError(
+        "This time was just booked by someone else.", code="SLOT_TAKEN"
+    ),
+    "ex_bookings_client_overlap": lambda: ConflictError(
+        "You already have a booking at this time.", code="CLIENT_OVERLAP"
+    ),
 }
 
 

@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.api.deps import DbSession, require_admin
+from app.api.deps import ClockDep, DbSession, require_admin
 from app.modules.providers.models import Provider
 from app.modules.providers.schemas import (
     ProviderAdmin,
@@ -20,8 +20,8 @@ admin_router = APIRouter(
 )
 
 
-def get_provider_service(db: DbSession) -> ProviderService:
-    return ProviderService(db)
+def get_provider_service(db: DbSession, clock: ClockDep) -> ProviderService:
+    return ProviderService(db, clock)
 
 
 ProviderServiceDep = Annotated[ProviderService, Depends(get_provider_service)]

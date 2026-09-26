@@ -1,15 +1,17 @@
 """Test helpers: a controllable clock and small object factories."""
 
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.security import create_access_token, hash_password
+from app.modules.bookings.models import Booking, BookingStatus
 from app.modules.catalog.models import Service
 from app.modules.providers.models import Provider
+from app.modules.scheduling.models import AvailabilityWindow
 from app.modules.users.models import User, UserRole
 
 DEFAULT_PASSWORD = "correct-horse-battery"
@@ -94,3 +96,44 @@ def make_provider(
     db.add(provider)
     db.commit()
     return provider
+
+
+MONDAY_HOURS = ((0, 9, 13), (0, 14, 18))
+
+
+def make_week(
+    db: Session, provider: Provider, windows: Sequence[tuple[int, int, int]] = MONDAY_HOURS
+) -> None:
+    db.add_all(
+        AvailabilityWindow(
+            provider_id=provider.id, weekday=weekday, start_time=time(start), end_time=time(end)
+        )
+        for weekday, start, end in windows
+    )
+    db.commit()
+
+
+def make_booking(
+    db: Session,
+    *,
+    client: User,
+    provider: Provider,
+    service: Service,
+    starts_at: datetime,
+    status: BookingStatus = BookingStatus.PENDING,
+) -> Booking:
+    """Direct insert that bypasses the service layer (setup data and constraint tests)."""
+    ends_at = starts_at + timedelta(minutes=service.duration_minutes)
+    booking = Booking(
+        client_id=client.id,
+        provider_id=provider.id,
+        service_id=service.id,
+        starts_at=starts_at,
+        ends_at=ends_at,
+        blocked_until=ends_at + timedelta(minutes=service.buffer_minutes),
+        price=service.price,
+        status=status,
+    )
+    db.add(booking)
+    db.commit()
+    return booking

@@ -61,3 +61,13 @@ def require_admin(user: CurrentUser) -> User:
 
 
 AdminUser = Annotated[User, Depends(require_admin)]
+
+
+def require_client(user: CurrentUser) -> User:
+    # Bookings are made by client accounts; admins manage them instead.
+    if user.role is not UserRole.CLIENT:
+        raise ForbiddenError("Only client accounts can book appointments.")
+    return user
+
+
+ClientUser = Annotated[User, Depends(require_client)]

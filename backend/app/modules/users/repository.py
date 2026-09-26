@@ -18,3 +18,6 @@ class UserRepository:
 
     def add(self, user: User) -> None:
         self.db.add(user)
+
+    def lock(self, user_id: uuid.UUID) -> User | None:
+        return self.db.scalar(select(User).where(User.id == user_id).with_for_update())

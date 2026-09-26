@@ -128,3 +128,12 @@ def compute_slots(
                 slots.append(TimeRange(start, start + duration))
             start += rules.step
     return slots
+
+
+def fits_weekly_hours(
+    appointment: TimeRange, weekly: Iterable[tuple[int, time, time]], tz: ZoneInfo
+) -> bool:
+    """Whether an appointment still fits a weekly schedule of (weekday, start, end) rows."""
+    day = appointment.start.astimezone(tz).date()
+    same_weekday = [(start, end) for weekday, start, end in weekly if weekday == day.weekday()]
+    return any(window.contains(appointment) for window in windows_for_date(same_weekday, day, tz))

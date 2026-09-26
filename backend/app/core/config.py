@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     business_timezone: str = "Asia/Tashkent"
     min_notice_minutes: int = Field(default=60, ge=0)
     max_advance_days: int = Field(default=60, ge=1)
+    max_active_bookings_per_client: int = Field(default=5, ge=1)
 
     @field_validator("business_timezone")
     @classmethod
