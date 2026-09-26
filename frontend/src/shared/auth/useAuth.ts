@@ -2,8 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, type User } from "../api/client";
 import { ApiError, unwrap } from "../api/errors";
-
-const ME_KEY = ["me"] as const;
+import { ME_KEY } from "../api/queryClient";
 
 export interface Credentials {
   email: string;

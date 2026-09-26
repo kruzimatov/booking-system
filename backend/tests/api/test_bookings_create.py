@@ -261,3 +261,16 @@ def test_past_bookings_do_not_block_schedule_changes(
     response = client.delete(f"/api/v1/admin/providers/{shop.provider.id}", headers=admin_headers)
 
     assert response.status_code == 204
+
+
+@pytest.mark.parametrize(
+    "starts_at",
+    ["9999-12-31T23:45:00-12:00", "0001-01-01T00:00:00+14:00", "2101-01-01T10:00:00+05:00"],
+)
+def test_absurd_years_are_rejected_before_any_date_arithmetic(
+    client: TestClient, shop: Shop, starts_at: str
+) -> None:
+    response = book(client, shop, starts_at=starts_at)
+
+    assert response.status_code == 422
+    assert "body.starts_at" in response.json()["error"]["details"]["fields"]

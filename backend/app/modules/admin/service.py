@@ -13,6 +13,10 @@ from app.modules.bookings.models import BookingStatus
 TOP_SERVICES = 5
 
 
+def month_end(day: date) -> date:
+    return (day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+
+
 class StatsService:
     def __init__(self, db: Session, clock: Clock, settings: Settings) -> None:
         self.stats = StatsRepository(db)
@@ -22,11 +26,10 @@ class StatsService:
     def summary(self, date_from: date | None, date_to: date | None) -> StatsOut:
         tz = self.settings.business_tz
         today = local_today(self.clock.now(), tz)
-        # Default: the current calendar month in business time.
-        first = date_from or today.replace(day=1)
-        last = date_to or (first.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(
-            days=1
-        )
+        # Missing ends default to the month of the given end, or to the current month.
+        anchor = date_from or date_to or today
+        first = date_from or anchor.replace(day=1)
+        last = date_to or month_end(first)
         if first > last:
             raise UnprocessableError("date_from must not be after date_to.", code="INVALID_RANGE")
         start = local_day_bounds(first, tz)[0]

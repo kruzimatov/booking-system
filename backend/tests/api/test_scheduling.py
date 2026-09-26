@@ -178,3 +178,11 @@ def test_availability_replace_is_public_to_read_and_admin_only_to_write(
         admin_url(provider, "availability"), json={"windows": []}, headers=admin_headers
     )
     assert cleared.json() == []
+
+
+def test_slots_reject_absurd_dates(
+    client: TestClient, db: Session, admin_headers: dict[str, str]
+) -> None:
+    provider, service = setup_provider(client, db, admin_headers)
+
+    assert get_slots(client, provider, service, day="9999-12-31").status_code == 422

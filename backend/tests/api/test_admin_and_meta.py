@@ -69,3 +69,23 @@ def test_meta_exposes_the_booking_policy(client: TestClient) -> None:
         "max_active_bookings_per_client": 5,
         "currency": "UZS",
     }
+
+
+def test_stats_with_only_an_end_date_use_that_month(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    stats = client.get(
+        "/api/v1/admin/stats", params={"date_to": "2029-11-20"}, headers=admin_headers
+    ).json()
+
+    assert (stats["date_from"], stats["date_to"]) == ("2029-11-01", "2029-11-20")
+
+
+def test_date_filters_reject_absurd_years(
+    client: TestClient, admin_headers: dict[str, str]
+) -> None:
+    for url, params in (
+        ("/api/v1/admin/stats", {"date_from": "9999-12-31"}),
+        ("/api/v1/admin/bookings", {"date_to": "9999-12-31"}),
+    ):
+        assert client.get(url, params=params, headers=admin_headers).status_code == 422

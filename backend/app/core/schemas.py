@@ -1,13 +1,29 @@
+from datetime import date, datetime
 from typing import Annotated, Any, ClassVar, Self
 
 from pydantic import (
     AfterValidator,
+    AwareDatetime,
     BaseModel,
     ConfigDict,
     EmailStr,
     StringConstraints,
     model_validator,
 )
+
+# Dates far outside this range are never valid here, and near date.max the timezone and
+# day arithmetic would overflow into a 500. Checked on the calendar year before any maths.
+EARLIEST_YEAR, LATEST_YEAR = 2000, 2100
+
+
+def _within_supported_years[DateT: (date, datetime)](value: DateT) -> DateT:
+    if not EARLIEST_YEAR <= value.year <= LATEST_YEAR:
+        raise ValueError(f"Year must be between {EARLIEST_YEAR} and {LATEST_YEAR}")
+    return value
+
+
+BoundedDatetime = Annotated[AwareDatetime, AfterValidator(_within_supported_years)]
+BoundedDate = Annotated[date, AfterValidator(_within_supported_years)]
 
 NormalizedEmail = Annotated[EmailStr, AfterValidator(str.lower)]
 NameText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]

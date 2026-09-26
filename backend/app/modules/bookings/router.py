@@ -1,11 +1,10 @@
 import uuid
-from datetime import date
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import AdminUser, ClientUser, ClockDep, DbSession, SettingsDep, require_admin
-from app.core.schemas import Page
+from app.core.schemas import BoundedDate, Page
 from app.modules.bookings.models import Booking, BookingStatus
 from app.modules.bookings.policies import Action
 from app.modules.bookings.schemas import BookingAdminOut, BookingCreate, BookingOut, CancelRequest
@@ -85,8 +84,8 @@ def admin_list_bookings(
     bookings: BookingServiceDep,
     status_in: Annotated[list[BookingStatus] | None, Query(alias="status")] = None,
     provider_id: uuid.UUID | None = None,
-    date_from: date | None = None,
-    date_to: date | None = None,
+    date_from: BoundedDate | None = None,
+    date_to: BoundedDate | None = None,
     needs_action: bool = False,
     page: PageNumber = 1,
     size: PageSize = 20,

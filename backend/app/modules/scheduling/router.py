@@ -1,10 +1,10 @@
 import uuid
-from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import ClockDep, DbSession, SettingsDep, require_admin
+from app.core.schemas import BoundedDate
 from app.modules.scheduling.models import AvailabilityWindow, TimeOff
 from app.modules.scheduling.schemas import (
     AvailabilityReplace,
@@ -39,7 +39,7 @@ def get_availability(
 def list_slots(
     provider_id: uuid.UUID,
     service_id: uuid.UUID,
-    day: Annotated[date, Query(alias="date", description="Business-local date, YYYY-MM-DD")],
+    day: Annotated[BoundedDate, Query(alias="date", description="Business-local date, YYYY-MM-DD")],
     schedule: ScheduleServiceDep,
 ) -> list[SlotOut]:
     slots = schedule.get_slots(provider_id, service_id, day)

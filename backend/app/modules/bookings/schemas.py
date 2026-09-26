@@ -2,9 +2,9 @@ import uuid
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import AwareDatetime, Field, StringConstraints
+from pydantic import Field, StringConstraints
 
-from app.core.schemas import RequestSchema, ResponseSchema
+from app.core.schemas import BoundedDatetime, RequestSchema, ResponseSchema
 from app.core.timezone import BusinessDateTime
 from app.modules.bookings.models import BookingStatus
 from app.modules.bookings.policies import Action
@@ -18,7 +18,7 @@ class BookingCreate(RequestSchema):
 
     provider_id: uuid.UUID
     service_id: uuid.UUID
-    starts_at: AwareDatetime
+    starts_at: BoundedDatetime
     notes: Notes | None = None
 
 
