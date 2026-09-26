@@ -1,8 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Repository root .env; a missing file is ignored (containers pass real env vars).
@@ -17,6 +18,22 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr
     jwt_ttl_minutes: int = 60
     cookie_secure: bool = False
+    business_timezone: str = "Asia/Tashkent"
+    min_notice_minutes: int = Field(default=60, ge=0)
+    max_advance_days: int = Field(default=60, ge=1)
+
+    @field_validator("business_timezone")
+    @classmethod
+    def timezone_exists(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError(f"Unknown timezone: {value}") from exc
+        return value
+
+    @property
+    def business_tz(self) -> ZoneInfo:
+        return ZoneInfo(self.business_timezone)
 
     @field_validator("jwt_secret")
     @classmethod

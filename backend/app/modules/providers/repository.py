@@ -32,5 +32,10 @@ class ProviderRepository:
     def get(self, provider_id: uuid.UUID) -> Provider | None:
         return self.db.get(Provider, provider_id)
 
+    def lock(self, provider_id: uuid.UUID) -> Provider | None:
+        # Row lock held until commit: serializes every change to one provider's schedule.
+        query = select(Provider).where(Provider.id == provider_id).with_for_update()
+        return self.db.scalar(query)
+
     def add(self, provider: Provider) -> None:
         self.db.add(provider)
