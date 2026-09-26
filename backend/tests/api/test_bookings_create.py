@@ -200,8 +200,9 @@ def test_booking_visibility(
     url = f"{BOOKINGS_URL}/{booking_id}"
 
     assert client.get(url, headers=shop.headers).status_code == 200
-    assert client.get(url, headers=admin).status_code == 200
     assert client.get(url, headers=stranger).status_code == 404
+    assert client.get(f"/api/v1/admin/bookings/{booking_id}", headers=admin).status_code == 200
+    assert client.get(f"/api/v1/admin/bookings/{booking_id}", headers=stranger).status_code == 403
 
 
 def test_price_is_a_snapshot(

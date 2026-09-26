@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 
+from app.modules.admin.router import router as admin_stats_router
 from app.modules.auth.router import router as auth_router
+from app.modules.bookings.router import admin_router as bookings_admin_router
 from app.modules.bookings.router import router as bookings_router
 from app.modules.catalog.router import admin_router as catalog_admin_router
 from app.modules.catalog.router import router as catalog_router
@@ -20,6 +22,8 @@ for module_router in (
     scheduling_router,
     scheduling_admin_router,
     bookings_router,
+    bookings_admin_router,
+    admin_stats_router,
     system_router,
 ):
     api_router.include_router(module_router)

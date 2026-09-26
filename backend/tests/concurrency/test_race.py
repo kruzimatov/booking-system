@@ -20,13 +20,15 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.core.errors import AppError
-from app.modules.bookings.models import Booking, BookingStatus
+from app.modules.bookings.models import Booking, BookingEvent, BookingStatus
+from app.modules.bookings.policies import Action
 from app.modules.bookings.schemas import BookingCreate
 from app.modules.bookings.service import BookingService
 from app.modules.catalog.models import Service
 from app.modules.providers.models import Provider
 from app.modules.scheduling.schemas import TimeOffCreate
 from app.modules.scheduling.service import ScheduleService
+from app.modules.users.models import UserRole
 from tests.support import (
     FrozenClock,
     make_booking,
@@ -203,3 +205,29 @@ def test_cancelled_bookings_do_not_block_the_database_constraint(
     booking = make_booking(db, client=second, provider=provider, service=service, starts_at=TEN_AM)
 
     assert booking.id is not None
+
+
+def test_client_cancel_and_admin_confirm_at_the_same_moment(
+    db: Session, clock: FrozenClock, setup: tuple[Service, Provider]
+) -> None:
+    service, provider = setup
+    client = make_user(db)
+    admin = make_user(db, email="admin@example.com", role=UserRole.ADMIN)
+    booking = make_booking(db, client=client, provider=provider, service=service, starts_at=TEN_AM)
+    moves = [(client, Action.CANCEL), (admin, Action.CONFIRM)]
+
+    def act(session: Session, index: int) -> None:
+        actor, action = moves[index]
+        BookingService(session, clock, get_settings()).apply(actor, booking.id, action)
+
+    results = run_concurrently(2, act)
+    db.expire_all()
+    final = db.get(Booking, booking.id)
+    events = db.scalars(select(BookingEvent).where(BookingEvent.booking_id == booking.id)).all()
+
+    # Both orders are valid (confirm then cancel, or cancel then a refused confirm),
+    # but the stored status always matches the last recorded event: no lost update.
+    assert final is not None
+    assert final.status is BookingStatus.CANCELLED
+    assert events[-1].to_status is BookingStatus.CANCELLED
+    assert results in (Counter({"ok": 2}), Counter({"ok": 1, "INVALID_TRANSITION": 1}))

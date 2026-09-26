@@ -43,3 +43,10 @@ class PatchSchema(RequestSchema):
 
 class ResponseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+
+class Page[ItemT](BaseModel):
+    items: list[ItemT]
+    total: int
+    page: int
+    size: int
