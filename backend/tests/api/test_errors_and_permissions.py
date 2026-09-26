@@ -79,3 +79,22 @@ def test_admin_routes_reject_clients_and_allow_admins(
     assert as_client.json()["error"]["code"] == "FORBIDDEN"
     assert as_admin.status_code == 200
     assert anonymous.status_code == 401
+
+
+def test_state_changing_requests_from_another_origin_are_rejected(client: TestClient) -> None:
+    foreign = client.post("/api/v1/auth/logout", headers={"Origin": "https://evil.khayrullo.uz"})
+    same = client.post("/api/v1/auth/logout", headers={"Origin": "http://testserver"})
+    same_host_other_port = client.post(
+        "/api/v1/auth/logout", headers={"Origin": "http://testserver:8081"}
+    )
+    null_origin = client.post("/api/v1/auth/logout", headers={"Origin": "null"})
+    no_origin = client.post("/api/v1/auth/logout")
+    foreign_read = client.get("/api/v1/health", headers={"Origin": "https://evil.khayrullo.uz"})
+
+    assert foreign.status_code == 403
+    assert foreign.json()["error"]["code"] == "CROSS_ORIGIN_REQUEST"
+    assert same.status_code == 204
+    assert same_host_other_port.status_code == 204
+    assert null_origin.status_code == 403
+    assert no_origin.status_code == 204
+    assert foreign_read.status_code == 200

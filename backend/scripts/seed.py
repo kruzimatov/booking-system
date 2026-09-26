@@ -6,6 +6,7 @@ Dates are relative to today, so the demo never goes stale.
 
 import argparse
 import os
+import sys
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
@@ -14,6 +15,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.clock import SystemClock
 from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.core.security import hash_password
@@ -31,8 +33,11 @@ from app.modules.bookings.models import BookingStatus
 from app.modules.users.models import UserRole
 
 ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com")
-ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD", "demo-admin-password")
-CLIENT_PASSWORD = os.environ.get("SEED_CLIENT_PASSWORD", "demo-client-password")
+# Local defaults are published in the README; they are refused on an HTTPS deployment.
+LOCAL_ADMIN_PASSWORD = "demo-admin-password"  # noqa: S105 (public local demo value)
+LOCAL_CLIENT_PASSWORD = "demo-client-password"  # noqa: S105 (public local demo value)
+ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD") or LOCAL_ADMIN_PASSWORD
+CLIENT_PASSWORD = os.environ.get("SEED_CLIENT_PASSWORD") or LOCAL_CLIENT_PASSWORD
 
 
 @dataclass(frozen=True)
@@ -60,7 +65,7 @@ def at(day: date, hour: int, minute: int, tz: ZoneInfo) -> datetime:
 
 def seed(db: Session) -> None:
     tz = get_settings().business_tz
-    today = datetime.now(UTC).astimezone(tz).date()
+    today = SystemClock().now().astimezone(tz).date()
 
     admin = User(
         email=ADMIN_EMAIL,
@@ -188,6 +193,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reset", action="store_true", help="delete all data first")
     arguments = parser.parse_args()
+    local_passwords = {LOCAL_ADMIN_PASSWORD, LOCAL_CLIENT_PASSWORD}
+    if get_settings().cookie_secure and local_passwords & {ADMIN_PASSWORD, CLIENT_PASSWORD}:
+        sys.exit(
+            "Refusing to seed an HTTPS deployment with the public demo passwords. "
+            "Set SEED_ADMIN_PASSWORD and SEED_CLIENT_PASSWORD in .env first."
+        )
     with SessionLocal() as db:
         if arguments.reset:
             reset(db)

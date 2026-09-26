@@ -3,6 +3,7 @@ from fastapi.routing import APIRoute
 
 from app.api.router import api_router
 from app.core.errors import register_error_handlers
+from app.core.origin import SameOriginMiddleware
 
 
 def _operation_id(route: APIRoute) -> str:
@@ -21,6 +22,7 @@ def create_app() -> FastAPI:
         generate_unique_id_function=_operation_id,
     )
     register_error_handlers(app)
+    app.add_middleware(SameOriginMiddleware)
     app.include_router(api_router)
     return app
 

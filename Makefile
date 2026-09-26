@@ -1,4 +1,4 @@
-.PHONY: env up down dev-db db-shell migrate api web test lint format seed openapi create-admin
+.PHONY: env up demo down dev-db db-shell migrate api web test lint format seed openapi create-admin
 
 BACKEND = cd backend &&
 FRONTEND = cd frontend &&
@@ -9,6 +9,9 @@ env:
 
 up:
 	docker compose up -d --build --wait
+
+# Replaces all data with the demo shop. Never run this on a server with real bookings.
+demo:
 	docker compose exec api python -m scripts.seed --reset
 
 down:
