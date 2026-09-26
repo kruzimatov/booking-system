@@ -4,6 +4,9 @@
 
 Appointment booking for a small service business, such as a barbershop. Clients pick a service, a specialist and a free time, then book. The business manages services, specialists, working hours, time off and bookings.
 
+**Live demo:** https://booking-api.veraflow.uz · API documentation: https://booking-api.veraflow.uz/api/docs
+Demo accounts for the live site are shared with reviewers privately (the public repository only contains local demo passwords).
+
 The focus is correctness: **a time slot can never be booked twice**, even when many people press "Book" at the same moment. The database enforces this itself, and concurrency tests prove it.
 
 ## Contents
