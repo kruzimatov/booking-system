@@ -1,7 +1,18 @@
-.PHONY: dev-db db-shell migrate api web test lint format seed openapi create-admin
+.PHONY: env up down dev-db db-shell migrate api web test lint format seed openapi create-admin
 
 BACKEND = cd backend &&
 FRONTEND = cd frontend &&
+
+# Creates .env from the example with a fresh random JWT secret (never overwrites).
+env:
+	@test -f .env && echo ".env already exists" || (sed "s/^JWT_SECRET=$$/JWT_SECRET=$$(openssl rand -hex 32)/" .env.example > .env && echo "Created .env")
+
+up:
+	docker compose up -d --build --wait
+	docker compose exec api python -m scripts.seed --reset
+
+down:
+	docker compose down
 
 dev-db:
 	docker compose up -d --wait db
