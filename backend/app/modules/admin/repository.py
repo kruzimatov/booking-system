@@ -22,7 +22,7 @@ class StatsRepository:
             .where(Booking.starts_at >= start, Booking.starts_at < end)
             .group_by(Booking.status)
         )
-        return {status: count for status, count in self.db.execute(query).tuples()}
+        return {row[0]: row[1] for row in self.db.execute(query)}
 
     def completed_revenue(self, start: datetime, end: datetime) -> Decimal:
         query = select(func.coalesce(func.sum(Booking.price), 0)).where(
@@ -44,7 +44,7 @@ class StatsRepository:
             .group_by(Provider.id, Provider.full_name)
             .order_by(func.count(Booking.id).desc(), Provider.full_name)
         )
-        return list(self.db.execute(query).tuples())
+        return [(row[0], row[1], row[2]) for row in self.db.execute(query)]
 
     def top_services(
         self, start: datetime, end: datetime, limit: int
@@ -58,4 +58,4 @@ class StatsRepository:
             .order_by(func.count(Booking.id).desc(), Service.name)
             .limit(limit)
         )
-        return list(self.db.execute(query).tuples())
+        return [(row[0], row[1], row[2]) for row in self.db.execute(query)]

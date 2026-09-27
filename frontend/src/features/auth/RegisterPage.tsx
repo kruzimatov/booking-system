@@ -41,7 +41,7 @@ export function RegisterPage() {
 
   const failure = register.error ?? login.error;
   return (
-    <Paper withBorder p="xl" radius="md" maw={420} mx="auto" mt="xl">
+    <Paper className="auth-panel" withBorder p={{ base: "lg", sm: "xl" }} radius="lg" maw={460} mx="auto" mt={{ base: "md", sm: "xl" }}>
       <form onSubmit={submit} noValidate>
         <Stack>
           <Title order={1} size="h2">

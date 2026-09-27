@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
+import "./app/global.css";
 
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
@@ -15,7 +16,7 @@ import { queryClient } from "./shared/api/queryClient";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider theme={theme} defaultColorScheme="auto">
+    <MantineProvider theme={theme} defaultColorScheme="light">
       <Notifications position="top-right" />
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />

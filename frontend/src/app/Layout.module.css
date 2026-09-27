@@ -1,19 +1,23 @@
 .link {
   display: block;
-  padding: 6px 12px;
-  border-radius: var(--mantine-radius-sm);
+  padding: 8px 12px;
+  border-radius: var(--mantine-radius-md);
   color: var(--mantine-color-text);
   font-weight: 500;
   text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .link:hover {
-  background: var(--mantine-color-default-hover);
+  background: var(--booking-wash);
+  color: var(--mantine-color-clay-7);
+  transform: translateY(-1px);
 }
 
 .link[aria-current="page"] {
-  background: var(--mantine-color-teal-light);
-  color: var(--mantine-color-teal-light-color);
+  background: var(--mantine-color-clay-1);
+  color: var(--mantine-color-clay-8);
+  font-weight: 700;
 }
 
 .link:focus-visible {
@@ -33,4 +37,37 @@
 
 .skip:focus {
   left: 8px;
+}
+
+.header {
+  background: rgba(252, 250, 247, 0.9);
+  border-bottom-color: var(--booking-line);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: -0.03em;
+}
+
+.brandMark {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px 9px 9px 2px;
+  background: var(--mantine-color-clay-6);
+  color: white;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 700;
+  transform: rotate(-6deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
 }

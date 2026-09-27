@@ -20,6 +20,7 @@ The focus is correctness: **a time slot can never be booked twice**, even when m
 - [Edge cases](#edge-cases)
 - [API](#api)
 - [Tests](#tests)
+- [Testing guide](docs/TESTING.md)
 - [Security](#security)
 - [Deployment](#deployment)
 - [How AI was used](#how-ai-was-used)
@@ -82,6 +83,17 @@ make test      # backend test suite
 make lint      # ruff, mypy, oxlint, TypeScript
 make openapi   # regenerate frontend API types after changing the backend
 ```
+
+To run the local frontend against the deployed API instead of a local FastAPI
+process, create `frontend/.env.local` from `frontend/.env.example` and set:
+
+```bash
+VITE_API_PROXY_TARGET=https://booking-api.veraflow.uz
+```
+
+Restart `make web` after changing this value. Vite keeps the browser on
+`localhost:5173` and proxies `/api` server-side; the remote production cookie
+is rewritten for this local development origin. Do not commit `.env.local`.
 
 ## Architecture
 
@@ -187,6 +199,10 @@ curl -b jar -X POST localhost:8081/api/v1/bookings -H 'Content-Type: application
 ```
 
 ## Tests
+
+The full testing workflow, including automated checks, environment smoke
+checks, and the manual browser checklist, is in
+[docs/TESTING.md](docs/TESTING.md).
 
 ```bash
 make dev-db && make test
