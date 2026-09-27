@@ -30,8 +30,32 @@ make smoke
 
 For split development, start the database and API with `make dev-db`,
 `make migrate`, and `make api`, then start the frontend with `make web`.
-The frontend can use the local API or the configured remote proxy in
-`frontend/.env.local`.
+The frontend always talks to the local API, so testing never touches the
+live demo data.
+
+## Browser end-to-end tests
+
+With the full local stack running (`make up && make demo`):
+
+```bash
+make e2e
+```
+
+Playwright (Chromium) runs three scenarios against the real stack:
+
+1. A client logs in through the form, books a free time, finds it in
+   My bookings and cancels it; the time becomes free again.
+2. Another client takes the same time while the first is on the confirm
+   step: the app shows "This time is no longer free", returns to the time
+   step and no longer offers that time.
+3. An admin confirms a pending booking from the dashboard; the stored status
+   and audit events are checked through the API.
+
+Each test cancels the bookings it created, so the suite can run repeatedly
+without resetting the data. Login is rate-limited (10 per minute), so each
+account logs in once per run and reuses its session. The tests use the local
+demo passwords and must not be pointed at a deployment with real users.
+CI runs the same suite on every push.
 
 ## Manual browser checklist
 

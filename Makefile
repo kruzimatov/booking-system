@@ -1,4 +1,4 @@
-.PHONY: env up demo down dev-db db-shell migrate api web test lint format seed openapi create-admin smoke
+.PHONY: env up demo down dev-db db-shell migrate api web test lint format seed openapi create-admin smoke e2e
 
 BACKEND = cd backend &&
 FRONTEND = cd frontend &&
@@ -54,3 +54,7 @@ create-admin:
 
 smoke:
 	BASE_URL=$${BASE_URL:-http://localhost:8081} ./scripts/smoke.sh
+
+# Browser tests against the local full stack (run `make up && make demo` first).
+e2e:
+	$(FRONTEND) npx playwright test

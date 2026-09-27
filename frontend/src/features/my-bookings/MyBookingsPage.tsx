@@ -31,7 +31,7 @@ function BookingList({ scope }: { scope: Scope }) {
   return (
     <Stack gap="sm">
       {bookings.data.items.map((booking) => (
-        <Paper key={booking.id} withBorder p="md" radius="md">
+        <Paper key={booking.id} data-booking-id={booking.id} withBorder p="md" radius="md">
           <Group justify="space-between" align="flex-start" wrap="nowrap">
             <Stack gap={4}>
               <Group gap="xs">

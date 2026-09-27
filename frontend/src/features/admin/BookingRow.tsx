@@ -31,7 +31,7 @@ export function BookingRow({ booking }: { booking: AdminBooking }) {
 
   return (
     <>
-      <Table.Tr>
+      <Table.Tr data-booking-id={booking.id}>
         <Table.Td>
           <Text size="sm" fw={500}>
             {formatDateTime(booking.starts_at, meta.timezone)}
