@@ -84,17 +84,6 @@ make lint      # ruff, mypy, oxlint, TypeScript
 make openapi   # regenerate frontend API types after changing the backend
 ```
 
-To run the local frontend against the deployed API instead of a local FastAPI
-process, create `frontend/.env.local` from `frontend/.env.example` and set:
-
-```bash
-VITE_API_PROXY_TARGET=https://booking-api.veraflow.uz
-```
-
-Restart `make web` after changing this value. Vite keeps the browser on
-`localhost:5173` and proxies `/api` server-side; the remote production cookie
-is rewritten for this local development origin. Do not commit `.env.local`.
-
 ## Architecture
 
 ```
