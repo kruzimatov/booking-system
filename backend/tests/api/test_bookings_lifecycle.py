@@ -189,6 +189,6 @@ def test_client_downloads_a_calendar_file_for_own_booking_only(
     assert response.headers["content-type"].startswith("text/calendar")
     assert "attachment" in response.headers["content-disposition"]
     assert "DTSTART:20300107T050000Z" in response.text
-    assert "SUMMARY:Haircut with Aziz Karimov" in response.text
+    assert "SUMMARY:Haircut with Temurbek Xolmatov" in response.text
     assert client.get(url, headers=stranger).status_code == 404
     assert client.get(url).status_code == 401

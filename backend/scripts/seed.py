@@ -1,4 +1,4 @@
-"""Demo data for reviewers: a small barbershop with three providers and a few bookings.
+"""Demo data for reviewers: a grooming studio in Tashkent with five specialists.
 
 Usage (from backend/): uv run python -m scripts.seed --reset
 Dates are relative to today, so the demo never goes stale.
@@ -39,11 +39,146 @@ LOCAL_CLIENT_PASSWORD = "demo-client-password"  # noqa: S105 (public local demo 
 ADMIN_PASSWORD = os.environ.get("SEED_ADMIN_PASSWORD") or LOCAL_ADMIN_PASSWORD
 CLIENT_PASSWORD = os.environ.get("SEED_CLIENT_PASSWORD") or LOCAL_CLIENT_PASSWORD
 
+MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
+
 
 @dataclass(frozen=True)
-class Shift:
+class ServiceSpec:
+    name: str
+    minutes: int
+    buffer: int
+    price: str
+    description: str
+
+
+@dataclass(frozen=True)
+class SpecialistSpec:
+    name: str
+    bio: str
+    services: tuple[str, ...]
     weekdays: tuple[int, ...]
-    windows: tuple[tuple[int, int], ...]
+    hours: tuple[tuple[int, int], ...]
+
+
+@dataclass(frozen=True)
+class ClientSpec:
+    email: str
+    name: str
+    phone: str | None
+
+
+@dataclass(frozen=True)
+class BookingSpec:
+    days_from_today: int
+    specialist: str
+    service: str
+    client: str
+    start: time
+    history: tuple[BookingStatus, ...]
+    notes: str | None = None
+
+
+SERVICES = (
+    ServiceSpec("Classic haircut", 45, 15, "120000", "Scissor or clipper cut, wash and styling."),
+    ServiceSpec("Skin fade", 60, 15, "150000", "Fade blended to the skin, razor line-up."),
+    ServiceSpec("Beard shaping", 30, 5, "70000", "Trim and contour, finished with a hot towel."),
+    ServiceSpec("Royal shave", 45, 10, "90000", "Straight-razor shave with hot towels and balm."),
+    ServiceSpec(
+        "Haircut and beard", 75, 15, "180000", "Classic haircut and beard shaping together."
+    ),
+    ServiceSpec("Kids haircut", 30, 5, "80000", "For children up to 12; cartoons included."),
+    ServiceSpec("Hair colouring", 90, 15, "250000", "Single-tone colour or grey blending."),
+    ServiceSpec("Scalp massage", 30, 5, "60000", "Relaxing head and scalp massage with warm oil."),
+)
+
+SPECIALISTS = (
+    SpecialistSpec(
+        "Temurbek Xolmatov",
+        "Senior barber, nine years behind the chair. Classic cuts and clean fades.",
+        ("Classic haircut", "Skin fade", "Beard shaping", "Haircut and beard"),
+        (MON, TUE, WED, THU, FRI),
+        ((10, 14), (15, 20)),
+    ),
+    SpecialistSpec(
+        "Farrux Ergashev",
+        "Fade specialist, trained in Istanbul. Books up fast on Saturdays.",
+        ("Classic haircut", "Skin fade", "Beard shaping"),
+        (TUE, WED, THU, FRI, SAT),
+        ((11, 20),),
+    ),
+    SpecialistSpec(
+        "Doniyor Qahhorov",
+        "Master of the straight razor and the long, quiet shave.",
+        ("Royal shave", "Beard shaping", "Haircut and beard"),
+        (MON, WED, FRI, SAT),
+        ((9, 13), (14, 18)),
+    ),
+    SpecialistSpec(
+        "Sevara Mahmudova",
+        "Children's favourite: calm hands, patience, and a lollipop at the end.",
+        ("Kids haircut", "Classic haircut"),
+        (MON, TUE, WED, THU),
+        ((12, 19),),
+    ),
+    SpecialistSpec(
+        "Nodira Ismoilova",
+        "Colourist and scalp-care specialist.",
+        ("Hair colouring", "Scalp massage"),
+        (WED, THU, FRI, SAT, SUN),
+        ((10, 17),),
+    ),
+)
+
+CLIENTS = (
+    ClientSpec("client@example.com", "Madina Yo'ldosheva", "+998 90 111 22 33"),
+    ClientSpec("shahzod@example.com", "Shahzod Tursunov", "+998 93 245 67 18"),
+    ClientSpec("kamola@example.com", "Kamola Saidova", None),
+    ClientSpec("bekzod@example.com", "Bekzod Rahimov", "+998 97 700 12 40"),
+    ClientSpec("ozoda@example.com", "Ozoda Nurmatova", None),
+)
+
+P, C, X, D = (
+    BookingStatus.PENDING,
+    BookingStatus.CONFIRMED,
+    BookingStatus.CANCELLED,
+    BookingStatus.COMPLETED,
+)
+
+# Past days move backwards and future days forwards to the specialist's nearest working day.
+BOOKINGS = (
+    BookingSpec(-3, "Temurbek Xolmatov", "Skin fade", "shahzod@example.com", time(10), (P, C, D)),
+    BookingSpec(
+        -3, "Nodira Ismoilova", "Hair colouring", "kamola@example.com", time(11), (P, C, D)
+    ),
+    BookingSpec(
+        -2, "Doniyor Qahhorov", "Royal shave", "bekzod@example.com", time(9, 30), (P, C, D)
+    ),
+    BookingSpec(-2, "Farrux Ergashev", "Skin fade", "shahzod@example.com", time(12), (P, X)),
+    BookingSpec(
+        -1,
+        "Sevara Mahmudova",
+        "Kids haircut",
+        "client@example.com",
+        time(12, 30),
+        (P, C, D),
+        notes="For my son Amir, he is 6.",
+    ),
+    BookingSpec(1, "Temurbek Xolmatov", "Classic haircut", "shahzod@example.com", time(10), (P, C)),
+    BookingSpec(1, "Temurbek Xolmatov", "Beard shaping", "bekzod@example.com", time(11), (P,)),
+    BookingSpec(1, "Nodira Ismoilova", "Scalp massage", "client@example.com", time(14), (P,)),
+    BookingSpec(2, "Farrux Ergashev", "Skin fade", "bekzod@example.com", time(17), (P, C)),
+    BookingSpec(
+        2,
+        "Sevara Mahmudova",
+        "Kids haircut",
+        "ozoda@example.com",
+        time(13),
+        (P,),
+        notes="Twins, please book the next slot for the second one too.",
+    ),
+    BookingSpec(3, "Doniyor Qahhorov", "Haircut and beard", "shahzod@example.com", time(14), (P,)),
+    BookingSpec(4, "Nodira Ismoilova", "Hair colouring", "kamola@example.com", time(10), (P, C)),
+)
 
 
 def reset(db: Session) -> None:
@@ -52,15 +187,15 @@ def reset(db: Session) -> None:
     db.commit()
 
 
-def next_workday(start: date, shift: Shift, step: int = 1) -> date:
+def nearest_workday(start: date, weekdays: tuple[int, ...], step: int) -> date:
     day = start
-    while day.weekday() not in shift.weekdays:
+    while day.weekday() not in weekdays:
         day += timedelta(days=step)
     return day
 
 
-def at(day: date, hour: int, minute: int, tz: ZoneInfo) -> datetime:
-    return datetime.combine(day, time(hour, minute), tzinfo=tz).astimezone(UTC)
+def at(day: date, moment: time, tz: ZoneInfo) -> datetime:
+    return datetime.combine(day, moment, tzinfo=tz).astimezone(UTC)
 
 
 def seed(db: Session) -> None:
@@ -69,124 +204,116 @@ def seed(db: Session) -> None:
 
     admin = User(
         email=ADMIN_EMAIL,
-        full_name="Shop Admin",
+        full_name="Studio Admin",
         password_hash=hash_password(ADMIN_PASSWORD),
         role=UserRole.ADMIN,
     )
-    malika = User(
-        email="client@example.com",
-        full_name="Malika Tosheva",
-        phone="+998901112233",
-        password_hash=hash_password(CLIENT_PASSWORD),
-    )
-    jasur = User(
-        email="jasur@example.com",
-        full_name="Jasur Aliev",
-        password_hash=hash_password(CLIENT_PASSWORD),
-    )
-
-    def service(name: str, minutes: int, buffer: int, price: str, about: str) -> Service:
-        return Service(
-            name=name,
-            description=about,
-            duration_minutes=minutes,
-            buffer_minutes=buffer,
-            price=Decimal(price),
+    client_password = hash_password(CLIENT_PASSWORD)
+    clients = {
+        spec.email: User(
+            email=spec.email, full_name=spec.name, phone=spec.phone, password_hash=client_password
         )
-
-    haircut = service("Haircut", 45, 15, "120000", "Classic or modern cut, wash included.")
-    beard = service("Beard trim", 30, 5, "60000", "Shape and trim with hot towel.")
-    combo = service("Haircut and beard", 75, 15, "170000", "Both services in one visit.")
-    kids = service("Kids haircut", 30, 5, "80000", "For children up to 12.")
-
-    shifts = {
-        "Aziz Karimov": Shift((0, 1, 2, 3, 4), ((9, 13), (14, 18))),
-        "Bobur Rashidov": Shift((1, 2, 3, 4, 5), ((10, 19),)),
-        "Dilnoza Yusupova": Shift((0, 2, 4), ((12, 20),)),
+        for spec in CLIENTS
     }
-    aziz = Provider(
-        full_name="Aziz Karimov",
-        bio="Senior barber, 8 years of experience.",
-        services=[haircut, beard, combo],
-    )
-    bobur = Provider(
-        full_name="Bobur Rashidov", bio="Beard specialist.", services=[haircut, beard, combo]
-    )
-    dilnoza = Provider(
-        full_name="Dilnoza Yusupova", bio="Great with kids.", services=[haircut, kids]
-    )
-    db.add_all([admin, malika, jasur, aziz, bobur, dilnoza])
+    services = {
+        spec.name: Service(
+            name=spec.name,
+            description=spec.description,
+            duration_minutes=spec.minutes,
+            buffer_minutes=spec.buffer,
+            price=Decimal(spec.price),
+        )
+        for spec in SERVICES
+    }
+    shifts = {spec.name: spec for spec in SPECIALISTS}
+    specialists = {
+        spec.name: Provider(
+            full_name=spec.name,
+            bio=spec.bio,
+            services=[services[name] for name in spec.services],
+        )
+        for spec in SPECIALISTS
+    }
+    db.add_all([admin, *clients.values(), *specialists.values()])
     db.flush()
 
-    for provider in (aziz, bobur, dilnoza):
-        shift = shifts[provider.full_name]
+    for spec in SPECIALISTS:
         db.add_all(
             AvailabilityWindow(
-                provider_id=provider.id,
+                provider_id=specialists[spec.name].id,
                 weekday=weekday,
                 start_time=time(start),
                 end_time=time(end),
             )
-            for weekday in shift.weekdays
-            for start, end in shift.windows
+            for weekday in spec.weekdays
+            for start, end in spec.hours
         )
 
-    bobur_off = next_workday(today + timedelta(days=7), shifts["Bobur Rashidov"])
-    db.add(
-        TimeOff(
-            provider_id=bobur.id,
-            starts_at=at(bobur_off, 14, 0, tz),
-            ends_at=at(bobur_off, 19, 0, tz),
-            reason="Training",
+    last_booking_day: dict[str, date] = {}
+    for booking in BOOKINGS:
+        weekdays = shifts[booking.specialist].weekdays
+        step = -1 if booking.days_from_today < 0 else 1
+        day = nearest_workday(today + timedelta(days=booking.days_from_today), weekdays, step)
+        last_booking_day[booking.specialist] = max(
+            day, last_booking_day.get(booking.specialist, day)
         )
-    )
+        add_booking(db, booking, day, tz, clients, specialists, services, admin)
 
-    def book(
-        client: User,
-        provider: Provider,
-        service: Service,
-        starts_at: datetime,
-        history: tuple[BookingStatus, ...],
-    ) -> None:
-        ends_at = starts_at + timedelta(minutes=service.duration_minutes)
-        booking = Booking(
-            client_id=client.id,
-            provider_id=provider.id,
-            service_id=service.id,
-            starts_at=starts_at,
-            ends_at=ends_at,
-            blocked_until=ends_at + timedelta(minutes=service.buffer_minutes),
-            price=service.price,
-            status=history[-1],
-            cancelled_at=starts_at - timedelta(days=1)
-            if history[-1] is BookingStatus.CANCELLED
-            else None,
-        )
-        db.add(booking)
-        db.flush()
-        previous: BookingStatus | None = None
-        for status in history:
-            actor = client if status in (BookingStatus.PENDING, BookingStatus.CANCELLED) else admin
-            db.add(
-                BookingEvent(
-                    booking_id=booking.id, actor_id=actor.id, from_status=previous, to_status=status
-                )
+    # Time off after each specialist's last demo booking, so no booking falls inside it.
+    for name, reason, hours in (
+        ("Farrux Ergashev", "Barber training", (time(14), time(20))),
+        ("Nodira Ismoilova", "Day off", (time(10), time(17))),
+    ):
+        day = nearest_workday(last_booking_day[name] + timedelta(days=1), shifts[name].weekdays, 1)
+        db.add(
+            TimeOff(
+                provider_id=specialists[name].id,
+                starts_at=at(day, hours[0], tz),
+                ends_at=at(day, hours[1], tz),
+                reason=reason,
             )
-            previous = status
-
-    pending, confirmed = BookingStatus.PENDING, BookingStatus.CONFIRMED
-    completed, cancelled = BookingStatus.COMPLETED, BookingStatus.CANCELLED
-    aziz_past = next_workday(today - timedelta(days=2), shifts["Aziz Karimov"], step=-1)
-    aziz_next = next_workday(today + timedelta(days=1), shifts["Aziz Karimov"])
-    bobur_next = next_workday(today + timedelta(days=1), shifts["Bobur Rashidov"])
-    dilnoza_next = next_workday(today + timedelta(days=2), shifts["Dilnoza Yusupova"])
-
-    book(malika, aziz, haircut, at(aziz_past, 10, 0, tz), (pending, confirmed, completed))
-    book(jasur, aziz, combo, at(aziz_past, 14, 0, tz), (pending, cancelled))
-    book(malika, aziz, beard, at(aziz_next, 11, 0, tz), (pending, confirmed))
-    book(jasur, bobur, haircut, at(bobur_next, 12, 0, tz), (pending,))
-    book(malika, dilnoza, kids, at(dilnoza_next, 15, 0, tz), (pending,))
+        )
     db.commit()
+
+
+def add_booking(
+    db: Session,
+    spec: BookingSpec,
+    day: date,
+    tz: ZoneInfo,
+    clients: dict[str, User],
+    specialists: dict[str, Provider],
+    services: dict[str, Service],
+    admin: User,
+) -> None:
+    client, service = clients[spec.client], services[spec.service]
+    starts_at = at(day, spec.start, tz)
+    ends_at = starts_at + timedelta(minutes=service.duration_minutes)
+    final = spec.history[-1]
+    booking = Booking(
+        client_id=client.id,
+        provider_id=specialists[spec.specialist].id,
+        service_id=service.id,
+        starts_at=starts_at,
+        ends_at=ends_at,
+        blocked_until=ends_at + timedelta(minutes=service.buffer_minutes),
+        price=service.price,
+        status=final,
+        notes=spec.notes,
+        cancelled_at=starts_at - timedelta(days=1) if final is BookingStatus.CANCELLED else None,
+        cancel_reason="Plans changed" if final is BookingStatus.CANCELLED else None,
+    )
+    db.add(booking)
+    db.flush()
+    previous: BookingStatus | None = None
+    for status in spec.history:
+        actor = client if status in (BookingStatus.PENDING, BookingStatus.CANCELLED) else admin
+        db.add(
+            BookingEvent(
+                booking_id=booking.id, actor_id=actor.id, from_status=previous, to_status=status
+            )
+        )
+        previous = status
 
 
 def main() -> None:
@@ -203,10 +330,10 @@ def main() -> None:
         if arguments.reset:
             reset(db)
         seed(db)
-    print("Demo data created.")
-    print(f"  Admin:  {ADMIN_EMAIL} / {ADMIN_PASSWORD}")
-    print(f"  Client: client@example.com / {CLIENT_PASSWORD}")
-    print(f"  Client: jasur@example.com / {CLIENT_PASSWORD}")
+    print("Demo data created: a grooming studio with 5 specialists and 8 services.")
+    print(f"  Admin:   {ADMIN_EMAIL} / {ADMIN_PASSWORD}")
+    for spec in CLIENTS:
+        print(f"  Client:  {spec.email} ({spec.name}) / {CLIENT_PASSWORD}")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ def event(**overrides: object) -> CalendarEvent:
     values: dict[str, object] = {
         "booking_id": BOOKING_ID,
         "service_name": "Haircut",
-        "provider_name": "Aziz Karimov",
+        "provider_name": "Temurbek Xolmatov",
         "starts_at": STARTS,
         "ends_at": STARTS + timedelta(minutes=45),
         "status": BookingStatus.CONFIRMED,
@@ -35,7 +35,7 @@ def test_event_has_utc_times_stable_uid_and_crlf_lines() -> None:
     assert "DTEND:20300107T054500Z" in lines
     assert "DTSTAMP:20300106T050000Z" in lines
     assert f"UID:{BOOKING_ID}@booking-system" in lines
-    assert "SUMMARY:Haircut with Aziz Karimov" in lines
+    assert "SUMMARY:Haircut with Temurbek Xolmatov" in lines
     assert "STATUS:CONFIRMED" in lines
 
 

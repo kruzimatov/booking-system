@@ -114,7 +114,7 @@ def test_one_client_booking_two_providers_at_once(
     db: Session, clock: FrozenClock, setup: tuple[Service, Provider]
 ) -> None:
     service, first = setup
-    second = make_provider(db, full_name="Bobur", services=[service])
+    second = make_provider(db, full_name="Farrux", services=[service])
     make_week(db, second)
     client = make_user(db)
     providers = [first, second]

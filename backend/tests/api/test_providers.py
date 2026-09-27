@@ -14,12 +14,16 @@ def test_admin_creates_provider_and_public_view_hides_contacts(
 ) -> None:
     created = client.post(
         ADMIN_URL,
-        json={"full_name": "Aziz Karimov", "email": "Aziz@Example.com", "phone": "+998901234567"},
+        json={
+            "full_name": "Temurbek Xolmatov",
+            "email": "Temurbek@Example.com",
+            "phone": "+998901234567",
+        },
         headers=admin_headers,
     )
 
     assert created.status_code == 201
-    assert created.json()["email"] == "aziz@example.com"
+    assert created.json()["email"] == "temurbek@example.com"
 
     public = client.get(f"{PUBLIC_URL}/{created.json()['id']}").json()
     assert set(public) == {"id", "full_name", "bio", "service_ids"}
@@ -30,11 +34,11 @@ def test_set_services_and_filter_public_list_by_service(
 ) -> None:
     haircut = make_service(db, name="Haircut")
     shave = make_service(db, name="Shave")
-    aziz = make_provider(db, full_name="Aziz")
-    make_provider(db, full_name="Bobur", services=[shave])
+    temurbek = make_provider(db, full_name="Temurbek")
+    make_provider(db, full_name="Farrux", services=[shave])
 
     response = client.put(
-        f"{ADMIN_URL}/{aziz.id}/services",
+        f"{ADMIN_URL}/{temurbek.id}/services",
         json={"service_ids": [str(haircut.id)]},
         headers=admin_headers,
     )
@@ -42,7 +46,7 @@ def test_set_services_and_filter_public_list_by_service(
     assert response.status_code == 200
     assert response.json()["service_ids"] == [str(haircut.id)]
     offering_haircut = client.get(PUBLIC_URL, params={"service_id": str(haircut.id)}).json()
-    assert [provider["full_name"] for provider in offering_haircut] == ["Aziz"]
+    assert [provider["full_name"] for provider in offering_haircut] == ["Temurbek"]
 
 
 def test_inactive_service_is_not_offered_publicly(client: TestClient, db: Session) -> None:

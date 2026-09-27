@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/kruzimatov/booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/kruzimatov/booking-system/actions/workflows/ci.yml)
 
-Appointment booking for a small service business, such as a barbershop. Clients pick a service, a specialist and a free time, then book. The business manages services, specialists, working hours, time off and bookings.
+Appointment booking for a small service business, such as a barbershop or grooming studio. Clients pick a service, a specialist and a free time, then book. The business manages services, specialists, working hours, time off and bookings.
 
 **Live demo:** https://booking-api.veraflow.uz · API documentation: https://booking-api.veraflow.uz/api/docs
 Demo accounts for the live site are shared with reviewers privately (the public repository only contains local demo passwords).
@@ -65,7 +65,7 @@ Demo accounts created by the seed script on your machine (local only: the seed s
 |---|---|---|
 | Admin | `admin@example.com` | `demo-admin-password` |
 | Client | `client@example.com` | `demo-client-password` |
-| Client | `jasur@example.com` | `demo-client-password` |
+| Client | `shahzod@example.com` | `demo-client-password` |
 
 Without `make`: copy `.env.example` to `.env`, set `JWT_SECRET` to a random value of at least 32 characters (`openssl rand -hex 32`), run `docker compose up -d --build --wait`, then `docker compose exec api python -m scripts.seed --reset`.
 

@@ -36,7 +36,7 @@ test:
 	$(BACKEND) uv run pytest
 
 lint:
-	$(BACKEND) uv run ruff check . && uv run ruff format --check . && uv run mypy app
+	$(BACKEND) uv run ruff check . && uv run ruff format --check . && uv run mypy app scripts
 	$(FRONTEND) npm run lint && npx tsc -b
 
 format:

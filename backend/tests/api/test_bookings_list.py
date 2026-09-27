@@ -88,15 +88,15 @@ def test_pagination(client: TestClient, db: Session, clock: FrozenClock) -> None
 
 def test_admin_filters(client: TestClient, db: Session, clock: FrozenClock) -> None:
     service = make_service(db)
-    aziz = make_provider(db, full_name="Aziz", services=[service])
-    bobur = make_provider(db, full_name="Bobur", services=[service])
+    temurbek = make_provider(db, full_name="Temurbek", services=[service])
+    farrux = make_provider(db, full_name="Farrux", services=[service])
     me = make_user(db, email="me@example.com")
     admin = bearer_headers(make_user(db, email="admin@example.com", role=UserRole.ADMIN), clock)
-    pending = make_booking(db, client=me, provider=aziz, service=service, starts_at=MONDAY_10)
+    pending = make_booking(db, client=me, provider=temurbek, service=service, starts_at=MONDAY_10)
     make_booking(
         db,
         client=me,
-        provider=bobur,
+        provider=farrux,
         service=service,
         starts_at=MONDAY_10 + timedelta(days=1),
         status=BookingStatus.CONFIRMED,
@@ -108,7 +108,7 @@ def test_admin_filters(client: TestClient, db: Session, clock: FrozenClock) -> N
 
     assert len(ids()) == 2
     assert ids(needs_action=True) == [str(pending.id)]
-    assert ids(provider_id=str(aziz.id)) == [str(pending.id)]
+    assert ids(provider_id=str(temurbek.id)) == [str(pending.id)]
     assert ids(date_from="2030-01-07", date_to="2030-01-07") == [str(pending.id)]
     assert len(ids(status=["pending", "confirmed"])) == 2
     reversed_range = client.get(

@@ -14,7 +14,7 @@ def test_stats_for_a_date_range(
 ) -> None:
     haircut = make_service(db, name="Haircut", price="100000.00")
     shave = make_service(db, name="Shave", price="50000.00")
-    aziz = make_provider(db, full_name="Aziz", services=[haircut, shave])
+    temurbek = make_provider(db, full_name="Temurbek", services=[haircut, shave])
     customer = make_user(db, email="customer@example.com")
     for day, service, status in (
         (0, haircut, BookingStatus.COMPLETED),
@@ -25,7 +25,7 @@ def test_stats_for_a_date_range(
         make_booking(
             db,
             client=customer,
-            provider=aziz,
+            provider=temurbek,
             service=service,
             starts_at=MONDAY_10 + timedelta(days=day),
             status=status,
@@ -46,7 +46,9 @@ def test_stats_for_a_date_range(
         "completed": 2,
     }
     assert stats["completed_revenue"] == "200000.00"
-    assert stats["bookings_per_provider"] == [{"id": str(aziz.id), "name": "Aziz", "count": 3}]
+    assert stats["bookings_per_provider"] == [
+        {"id": str(temurbek.id), "name": "Temurbek", "count": 3}
+    ]
     assert [row["name"] for row in stats["top_services"]] == ["Haircut", "Shave"]
     assert client.get("/api/v1/admin/stats", headers=client_headers).status_code == 403
 

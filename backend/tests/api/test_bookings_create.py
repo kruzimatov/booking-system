@@ -73,7 +73,7 @@ def test_booking_is_created_pending_with_server_computed_fields(
     assert body["ends_at"] == "2030-01-07T11:00:00+05:00"
     assert body["price"] == "150000.00"
     assert body["service"]["name"] == "Haircut"
-    assert body["provider"]["full_name"] == "Aziz Karimov"
+    assert body["provider"]["full_name"] == "Temurbek Xolmatov"
     events = db.scalars(select(BookingEvent)).all()
     assert [(event.from_status, event.to_status) for event in events] == [
         (None, BookingStatus.PENDING)
@@ -153,7 +153,7 @@ def test_slots_endpoint_hides_booked_time(client: TestClient, shop: Shop) -> Non
 def test_client_cannot_be_in_two_places_at_once(
     client: TestClient, db: Session, shop: Shop
 ) -> None:
-    second_provider = make_provider(db, full_name="Bobur", services=[shop.service])
+    second_provider = make_provider(db, full_name="Farrux", services=[shop.service])
     make_week(db, second_provider)
     assert book(client, shop).status_code == 201
 

@@ -82,13 +82,13 @@ def make_service(
 def make_provider(
     db: Session,
     *,
-    full_name: str = "Aziz Karimov",
+    full_name: str = "Temurbek Xolmatov",
     services: Sequence[Service] = (),
     is_active: bool = True,
 ) -> Provider:
     provider = Provider(
         full_name=full_name,
-        email="aziz@example.com",
+        email="temurbek@example.com",
         phone="+998901234567",
         is_active=is_active,
         services=list(services),
