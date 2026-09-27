@@ -15,6 +15,7 @@ from app.core.errors import (
     translate_integrity_errors,
 )
 from app.core.timezone import local_day_bounds
+from app.modules.bookings.calendar import CalendarEvent, to_ics
 from app.modules.bookings.models import Booking, BookingEvent, BookingStatus
 from app.modules.bookings.policies import (
     TRANSITIONS,
@@ -172,6 +173,19 @@ class BookingService:
         if booking is None or booking.client_id != client.id:
             raise NotFoundError("Booking not found.")
         return booking
+
+    def calendar_file(self, client: User, booking_id: uuid.UUID) -> str:
+        booking = self.get_own(client, booking_id)
+        event = CalendarEvent(
+            booking_id=booking.id,
+            service_name=booking.service.name,
+            provider_name=booking.provider.full_name,
+            starts_at=booking.starts_at,
+            ends_at=booking.ends_at,
+            status=booking.status,
+            notes=booking.notes,
+        )
+        return to_ics(event, generated_at=self.clock.now())
 
     def get_any(self, booking_id: uuid.UUID) -> Booking:
         booking = self.bookings.get(booking_id)

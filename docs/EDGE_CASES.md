@@ -73,6 +73,8 @@ Every case below is handled in code and covered by a test (test files are under 
 | Expired, unsigned or foreign token | `401` | `test_me_rejects_expired_token`, `test_me_rejects_unsigned_token`, `test_token_signed_with_another_secret_is_rejected` |
 | Admin tries to book | `403` | `test_admins_cannot_book` |
 | Client reads another client's booking | `404` (existence not revealed) | `test_booking_visibility` |
+| Calendar file for another client's booking, or without login | `404`, or `401` | `test_client_downloads_a_calendar_file_for_own_booking_only` |
+| Notes with commas, semicolons, new lines or long Cyrillic text in the calendar file | Escaped and folded per RFC 5545 without splitting characters | `unit/test_calendar.py` |
 | Public views of specialists | Email and phone are never included | `test_admin_creates_provider_and_public_view_hides_contacts` |
 | Unexpected server error | `500` with a generic message; no internal details | `test_unexpected_error_hides_internal_details` |
 | A POST from another website or sibling subdomain, using the victim's cookie | `403 CROSS_ORIGIN_REQUEST` | `test_state_changing_requests_from_another_origin_are_rejected` |

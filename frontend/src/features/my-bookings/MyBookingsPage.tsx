@@ -1,4 +1,4 @@
-import { Anchor, Group, Pagination, Paper, Stack, Tabs, Text, Title } from "@mantine/core";
+import { Anchor, Button, Group, Pagination, Paper, Stack, Tabs, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -45,7 +45,21 @@ function BookingList({ scope }: { scope: Scope }) {
                 with {booking.provider.full_name} · {formatPrice(booking.price, meta.currency)}
               </Text>
             </Stack>
-            <CancelButton booking={booking} />
+            <Stack gap="xs" align="flex-end">
+              {scope === "upcoming" && (
+                // A plain link: the browser downloads the .ics with the login cookie attached.
+                <Button
+                  component="a"
+                  href={`/api/v1/bookings/${booking.id}/calendar.ics`}
+                  download="appointment.ics"
+                  variant="subtle"
+                  size="xs"
+                >
+                  Add to calendar
+                </Button>
+              )}
+              <CancelButton booking={booking} />
+            </Stack>
           </Group>
         </Paper>
       ))}

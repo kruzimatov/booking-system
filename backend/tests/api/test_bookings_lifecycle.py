@@ -174,3 +174,21 @@ def test_admin_cancel_records_the_reason(client: TestClient, db: Session, world:
     assert body["cancel_reason"] == "Provider is ill"
     assert body["cancelled_at"] == "2030-01-07T08:00:00+05:00"
     assert body["events"][-1]["reason"] == "Provider is ill"
+
+
+def test_client_downloads_a_calendar_file_for_own_booking_only(
+    client: TestClient, db: Session, world: World, clock: FrozenClock
+) -> None:
+    booking = seed_booking(db, world)
+    url = f"/api/v1/bookings/{booking.id}/calendar.ics"
+
+    response = client.get(url, headers=world.client_headers)
+    stranger = bearer_headers(make_user(db, email="other@example.com"), clock)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/calendar")
+    assert "attachment" in response.headers["content-disposition"]
+    assert "DTSTART:20300107T050000Z" in response.text
+    assert "SUMMARY:Haircut with Aziz Karimov" in response.text
+    assert client.get(url, headers=stranger).status_code == 404
+    assert client.get(url).status_code == 401

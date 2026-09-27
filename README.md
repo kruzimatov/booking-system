@@ -35,13 +35,14 @@ The focus is correctness: **a time slot can never be booked twice**, even when m
 - See real free times for a day. Days the specialist does not work are disabled.
 - Book with an optional note. Bookings start as *pending* until the business confirms them.
 - See upcoming bookings and history, and cancel up to 2 hours before the start.
+- Add a booking to Google Calendar, Apple Calendar or Outlook with one click (`.ics` download).
 
 **Business (admin)**
 - Services, specialists, weekly working hours with breaks, and time off (via the API; see `/api/docs`).
 - A bookings dashboard: monthly numbers, a "needs action" queue, filters, and confirm / complete / cancel.
 - An audit trail for every booking: who changed its status, when, and why.
 
-Bonus items from the task that are included: timezone support, cancellation policy, admin dashboard, tests, Docker, API documentation.
+Bonus items from the task that are included: timezone support, calendar integration, cancellation policy, admin dashboard, tests, Docker, API documentation. Every task requirement is checked off in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
 
 ## Quick start
 
@@ -174,7 +175,7 @@ Interactive documentation is at `/api/docs`. All errors use one format:
 |---|---|
 | Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` |
 | Browse | `GET /services`, `GET /providers?service_id=`, `GET /providers/{id}/availability`, `GET /providers/{id}/slots?service_id=&date=` |
-| Client bookings | `POST /bookings`, `GET /bookings?scope=upcoming\|history`, `GET /bookings/{id}`, `POST /bookings/{id}/cancel` |
+| Client bookings | `POST /bookings`, `GET /bookings?scope=upcoming\|history`, `GET /bookings/{id}`, `GET /bookings/{id}/calendar.ics`, `POST /bookings/{id}/cancel` |
 | Admin | `/admin/services`, `/admin/providers` (and their availability, time off and services), `/admin/bookings`, `POST /admin/bookings/{id}/{confirm\|complete\|cancel}`, `GET /admin/stats` |
 | System | `GET /meta`, `GET /health` |
 
@@ -199,11 +200,11 @@ checks, and the manual browser checklist, is in
 make dev-db && make test
 ```
 
-- 141 backend tests: unit tests for the pure rules, API tests for every endpoint, and concurrency tests with real parallel transactions.
+- 146 backend tests: unit tests for the pure rules, API tests for every endpoint, and concurrency tests with real parallel transactions.
 - Tests run the real migrations on a separate `booking_test` database, so the database constraints are tested too.
 - Time is controlled with an injected clock, so rules like "2 hours before" and "after the end" are tested exactly.
 - Coverage: 98% of backend lines. The slot engine and the status rules are at 100%.
-- Browser end-to-end tests (Playwright) run against the full Docker stack: a client books and cancels, a slot is taken by someone else during confirmation, an admin confirms a booking. `make up && make demo && make e2e`.
+- Browser end-to-end tests (Playwright) run against the full Docker stack: a client books, downloads the calendar file and cancels, a slot is taken by someone else during confirmation, an admin confirms a booking. `make up && make demo && make e2e`.
 - CI runs linting, type checks, migrations, tests, dependency audits the frontend build and the end-to-end tests on every push.
 
 ## Security

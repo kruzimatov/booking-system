@@ -47,6 +47,14 @@ test("a client books a free time, sees it in My bookings and cancels it", async 
   await expect(card).toContainText("Haircut");
   await expect(card).toContainText("pending");
 
+  // Calendar export: the link downloads a valid iCalendar file for this booking.
+  const calendarLink = card.getByRole("link", { name: "Add to calendar" });
+  const calendar = await page.request.get((await calendarLink.getAttribute("href"))!);
+  expect(calendar.headers()["content-type"]).toContain("text/calendar");
+  const ics = await calendar.text();
+  expect(ics).toContain("BEGIN:VCALENDAR");
+  expect(ics).toContain(`UID:${bookingId}@booking-system`);
+
   await card.getByRole("button", { name: "Cancel" }).click();
   await page.getByRole("button", { name: "Cancel booking" }).click();
   await expect(page.getByText("Your booking was cancelled.")).toBeVisible();

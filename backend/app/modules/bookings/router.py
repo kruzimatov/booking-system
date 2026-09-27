@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.api.deps import AdminUser, ClientUser, ClockDep, DbSession, SettingsDep, require_admin
 from app.core.schemas import BoundedDate, Page
@@ -64,6 +64,22 @@ def get_my_booking(
     booking_id: uuid.UUID, client: ClientUser, bookings: BookingServiceDep
 ) -> BookingOut:
     return to_client_view(bookings, client, bookings.get_own(client, booking_id))
+
+
+@router.get(
+    "/{booking_id}/calendar.ics",
+    response_class=Response,
+    responses={200: {"content": {"text/calendar": {}}, "description": "iCalendar file"}},
+)
+def download_calendar_event(
+    booking_id: uuid.UUID, client: ClientUser, bookings: BookingServiceDep
+) -> Response:
+    """Add the appointment to Google Calendar, Apple Calendar or Outlook."""
+    return Response(
+        bookings.calendar_file(client, booking_id),
+        media_type="text/calendar; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="appointment.ics"'},
+    )
 
 
 @router.post("/{booking_id}/cancel")

@@ -44,7 +44,8 @@ make e2e
 Playwright (Chromium) runs three scenarios against the real stack:
 
 1. A client logs in through the form, books a free time, finds it in
-   My bookings and cancels it; the time becomes free again.
+   My bookings, downloads its calendar file and cancels it; the time
+   becomes free again.
 2. Another client takes the same time while the first is on the confirm
    step: the app shows "This time is no longer free", returns to the time
    step and no longer offers that time.

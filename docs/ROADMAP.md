@@ -15,7 +15,8 @@ Version 1 is a booking system for **one** small business, which is what the task
 | Rules | Minimum notice, booking horizon, cancellation cutoff, per-client limit (configurable per deployment) |
 | Time | Business timezone, UTC storage, business-day logic |
 | Admin | Bookings dashboard with filters, stats, confirm / complete / cancel; services, specialists, hours and time off through the API |
-| Quality | 141 backend tests, browser end-to-end tests, CI, Docker, API documentation |
+| Calendar | `.ics` download per booking (works with Google, Apple and Outlook calendars) |
+| Quality | 146 backend tests, browser end-to-end tests, CI, Docker, API documentation |
 
 The slot engine already receives its rules as a parameter instead of reading global settings, so per-business rules need no change to the engine itself.
 
@@ -45,7 +46,7 @@ Management screens for what is API-only today: services, specialists, weekly hou
 - An **outbox table**: the booking change and "notify about it" are saved in the same transaction; a background worker sends the message and retries on failure. No email for a booking that was rolled back, and no lost email for a booking that was saved.
 - Events: created, confirmed, cancelled, rescheduled, reminder before the appointment.
 - One channel first (email), then Telegram or SMS behind the same interface.
-- Calendar invitations (`.ics`) in the confirmation message.
+- The existing `.ics` export attached to confirmation emails.
 
 ### 5. Waitlist
 

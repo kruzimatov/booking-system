@@ -2772,6 +2772,51 @@
         ]
       }
     },
+    "/api/v1/bookings/{booking_id}/calendar.ics": {
+      "get": {
+        "description": "Add the appointment to Google Calendar, Apple Calendar or Outlook.",
+        "operationId": "download_calendar_event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Booking Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/calendar": {}
+            },
+            "description": "iCalendar file"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Download Calendar Event",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
     "/api/v1/bookings/{booking_id}/cancel": {
       "post": {
         "operationId": "cancel_my_booking",

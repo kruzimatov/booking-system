@@ -1,6 +1,6 @@
 # Task requirements checklist
 
-Every line of the task, with where it is implemented. ✅ done · ❌ not done.
+Every line of the task, with where it is implemented. ✅ done · ❌ not done (only email notifications).
 
 ## Minimum requirements
 
@@ -34,10 +34,10 @@ Every line of the task, with where it is implemented. ✅ done · ❌ not done.
 |---|---|---|
 | Timezone support | ✅ | Business timezone (`Asia/Tashkent`), UTC storage, business-day logic, `+05:00` in responses |
 | Email notification | ❌ | Not built. Design: outbox table and worker, see [ROADMAP.md](ROADMAP.md) phase 4 |
-| Calendar integration | ❌ | Not built. Planned as `.ics` invitations, [ROADMAP.md](ROADMAP.md) phase 4 |
+| Calendar integration | ✅ | "Add to calendar" on each upcoming booking downloads an iCalendar (`.ics`) file for Google Calendar, Apple Calendar or Outlook: `GET /api/v1/bookings/{id}/calendar.ics`, built by the pure `bookings/calendar.py` (RFC 5545 escaping and line folding, stable UID) |
 | Cancellation policy | ✅ | Clients cannot cancel less than 2 hours before; admins can; `allowed_actions` in responses |
 | Admin dashboard | ✅ | `/admin`: monthly stats, needs-action queue, filters, confirm / complete / cancel, history |
-| Tests | ✅ | 141 backend tests (unit, API, concurrency) and browser end-to-end tests (Playwright) |
+| Tests | ✅ | 146 backend tests (unit, API, concurrency) and browser end-to-end tests (Playwright) |
 | Docker | ✅ | `compose.yaml`: database, API, web; `make up` |
 | API documentation | ✅ | Swagger at `/api/docs`, generated from the code |
 
