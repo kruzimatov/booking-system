@@ -1,4 +1,4 @@
-import { Anchor, AppShell, Burger, Button, Container, Group, Menu, Stack, Text } from "@mantine/core";
+import { Anchor, AppShell, Avatar, Burger, Button, Container, Group, Menu, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link, NavLink, Outlet, useNavigate } from "react-router";
 
@@ -28,7 +28,9 @@ export function Layout() {
   const account = user ? (
     <Menu position="bottom-end" withinPortal>
       <Menu.Target>
-        <Button variant="default">{user.full_name}</Button>
+        <Button variant="subtle" color="dark" px="xs" leftSection={<Avatar size={28} color="clay" radius="xl">{user.full_name.slice(0, 1).toUpperCase()}</Avatar>}>
+          <Text size="sm" fw={600} maw={150} truncate>{user.full_name}</Text>
+        </Button>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>{user.email}</Menu.Label>
@@ -37,10 +39,10 @@ export function Layout() {
     </Menu>
   ) : (
     <Group gap="xs">
-      <Button variant="default" component={Link} to="/login">
+      <Button variant="subtle" color="dark" component={Link} to="/login">
         Log in
       </Button>
-      <Button component={Link} to="/register">
+      <Button color="clay" component={Link} to="/register">
         Sign up
       </Button>
     </Group>
@@ -51,12 +53,13 @@ export function Layout() {
       <a href="#main" className={classes.skip}>
         Skip to content
       </a>
-      <AppShell.Header>
+      <AppShell.Header className={classes.header}>
         <Container size="lg" h="100%">
           <Group h="100%" justify="space-between">
             <Group gap="lg">
               <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menu" />
-              <Anchor component={Link} to={user?.role === "admin" ? "/admin" : "/"} underline="never" c="inherit">
+              <Anchor className={classes.brand} component={Link} to={user?.role === "admin" ? "/admin" : "/"} underline="never" c="inherit">
+                <span className={classes.brandMark}>B</span>
                 <Text fw={800} size="lg">
                   Booking
                 </Text>

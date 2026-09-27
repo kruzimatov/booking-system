@@ -1,4 +1,4 @@
-.PHONY: env up demo down dev-db db-shell migrate api web test lint format seed openapi create-admin
+.PHONY: env up demo down dev-db db-shell migrate api web test lint format seed openapi create-admin smoke
 
 BACKEND = cd backend &&
 FRONTEND = cd frontend &&
@@ -51,3 +51,6 @@ openapi:
 
 create-admin:
 	$(BACKEND) uv run python -m scripts.create_admin
+
+smoke:
+	BASE_URL=$${BASE_URL:-http://localhost:8081} ./scripts/smoke.sh

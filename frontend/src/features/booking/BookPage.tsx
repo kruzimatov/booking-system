@@ -1,4 +1,4 @@
-import { Button, Group, Stack, Stepper, Text, Title } from "@mantine/core";
+import { Button, Group, Paper, Stack, Stepper, Text, Title } from "@mantine/core";
 
 import { usePageTitle } from "../../shared/hooks/usePageTitle";
 import { useProvidersFor, useServices } from "./api";
@@ -22,14 +22,15 @@ export function BookPage() {
   };
 
   return (
-    <Stack gap="lg">
+    <Stack gap="xl">
       <div>
-        <Title order={1} size="h2">
+        <Title order={1} size="h1" maw={620}>
           Book an appointment
         </Title>
-        <Text c="dimmed">Choose a service, a specialist and a free time.</Text>
+        <Text c="dimmed" size="lg" maw={560} mt="xs">Choose a service, a specialist and a free time.</Text>
       </div>
-      <Stepper active={active} onStepClick={goTo} allowNextStepsSelect={false} size="sm">
+      <Paper className="booking-panel" withBorder p={{ base: "md", sm: "xl" }} radius="lg">
+        <Stepper active={active} onStepClick={goTo} allowNextStepsSelect={false} size="sm">
         <Stepper.Step label="Service" description={service?.name}>
           <ServiceStep selected={serviceId} onSelect={(id) => choose("service", id)} />
         </Stepper.Step>
@@ -53,7 +54,8 @@ export function BookPage() {
             <ConfirmStep service={service} provider={provider} start={start} onSlotLost={() => choose("start", null)} />
           )}
         </Stepper.Step>
-      </Stepper>
+        </Stepper>
+      </Paper>
       {active > 0 && (
         <Group>
           <Button variant="subtle" onClick={() => goTo(active - 1)}>

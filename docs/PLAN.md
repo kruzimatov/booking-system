@@ -1276,6 +1276,198 @@ Tier 3, only if time allows:
 
 ---
 
+## V2 roadmap: multi-business booking platform
+
+V2 starts only after Phase 8 is complete and the current release is committed, deployed from a known commit, and covered by the manual checklist in `docs/TESTING.md`. Do not implement later V2 phases early. The order is intentional: tenant isolation must exist before business operations, notifications, payments, or integrations.
+
+### V2.0: Release the stable baseline
+
+**Goal:** make the current single-business system reproducible and safe to extend.
+
+**Steps:**
+1. Commit the reviewed frontend, backend cleanup, testing guide, smoke script, and design documentation.
+2. Push the exact commit and deploy from that commit; do not leave server-only source changes.
+3. Complete the authenticated client and admin manual checklist.
+4. Add a Playwright smoke suite for register/login, booking, cancellation, and the admin lifecycle.
+5. Keep the remaining dependency warning documented or resolve it without weakening the test suite.
+
+**Done when:** a fresh checkout passes `make lint test`, the deployed commit is identifiable, smoke checks pass, and the core authenticated flows are repeatable.
+
+**Commit:** `chore: release stable booking system baseline`
+
+### V2.1: Organizations and memberships
+
+**Goal:** introduce a secure organization boundary while preserving the existing demo business.
+
+**Files:**
+- `backend/app/modules/organizations/`: models, repository, schemas, service, router
+- `backend/app/modules/memberships/`: models, repository, schemas, service, router
+- `backend/app/api/deps.py` and `backend/app/api/router.py`
+- every business-owned module repository and schema affected by `organization_id`
+- Alembic migration and data migration for the existing demo organization
+- `backend/tests/api/test_organizations.py`, `test_memberships.py`, and tenant-isolation tests
+- `frontend/src/features/organizations/` and the authenticated app shell
+- `docs/ARCHITECTURE.md`, `docs/EDGE_CASES.md`, and `docs/AI_LOG.md`
+
+**Design decisions:**
+- Add `Organization` and `Membership`; do not replace memberships with a global user role.
+- Start with `owner`, `manager`, `receptionist`, `provider`, and `client` membership roles.
+- Add `organization_id` to services, providers, availability, time off, bookings, and related events.
+- Scope every repository read, write, lock, and uniqueness rule by organization.
+- Reject cross-organization service, provider, booking, and membership references.
+- Keep clients able to book only in an explicitly selected organization.
+
+**Tests:**
+- a user cannot read or mutate another organization's resources;
+- a provider cannot be assigned across organizations;
+- organization-scoped uniqueness and foreign keys hold;
+- membership role checks are enforced on every protected route;
+- existing demo data is migrated into one organization without changing booking history.
+
+**Done when:** tenant-isolation tests pass, all existing tests remain green, and the active organization is visible in the authenticated frontend shell.
+
+**Commit:** `feat(organizations): add tenant and membership foundation`
+
+### V2.2: Business operations dashboard
+
+**Goal:** give each organization a usable workspace for managing its business.
+
+**Scope:**
+- organization onboarding and settings;
+- service and provider management;
+- provider-service assignment;
+- weekly availability and time-off editor;
+- booking calendar with day/week, provider, and status filters;
+- booking search, detail, and customer views;
+- membership and role management.
+
+**Done when:** an owner can configure an organization end to end, and staff can manage bookings without accessing another organization.
+
+**Commit:** `feat(admin): add organization operations dashboard`
+
+### V2.3: Booking lifecycle improvements
+
+**Goal:** support real operational workflows without corrupting booking state.
+
+**Scope:**
+- rescheduling;
+- cancellation reasons and configurable cancellation window;
+- `no_show` status;
+- provider notes and visibility rules;
+- waitlist;
+- configurable booking horizon, minimum notice, and active-booking limits.
+
+Keep booking and payment as separate state machines:
+
+```text
+Booking: pending -> confirmed -> completed
+         pending -> cancelled
+         confirmed -> cancelled | no_show
+
+Payment: unpaid -> pending -> paid
+         pending -> failed
+         paid -> refunded
+```
+
+**Tests:**
+- every transition is authorized and auditable;
+- rescheduling reuses the same overlap and lock rules as creation;
+- cancellation policy is evaluated in the business timezone;
+- a waitlisted client is notified only after a slot is actually released.
+
+**Done when:** all lifecycle actions have explicit endpoints, policy tests, concurrency tests, and frontend error handling.
+
+**Commit:** `feat(bookings): add rescheduling waitlist and no-show lifecycle`
+
+### V2.4: Notifications and background jobs
+
+**Goal:** deliver reliable reminders and booking updates without coupling external I/O to booking transactions.
+
+**Scope:**
+- transactional outbox;
+- worker process and retry policy;
+- email notifications for booking creation, confirmation, cancellation, rescheduling, and reminders;
+- notification templates and delivery status;
+- organization notification preferences.
+
+The booking service writes the booking and outbox event in one transaction. A worker sends the notification afterward with idempotency and bounded retries.
+
+**Done when:** a failed provider call cannot roll back a booking, duplicate delivery is prevented, and failed jobs are visible to staff.
+
+**Commit:** `feat(notifications): add outbox and appointment reminders`
+
+### V2.5: Payments
+
+**Goal:** accept and reconcile appointment payments without trusting client input.
+
+**Scope:**
+- payment records and state machine;
+- one payment-provider adapter;
+- checkout session;
+- signed webhook verification;
+- idempotency keys;
+- refunds and cancellation/refund policy;
+- payment audit events.
+
+Only verified provider webhooks may mark a payment as paid. Booking confirmation and payment status remain separate decisions.
+
+**Done when:** duplicate webhooks are harmless, invalid signatures are rejected, refunds are auditable, and unpaid/paid policy behavior is tested.
+
+**Commit:** `feat(payments): add provider checkout and webhook reconciliation`
+
+### V2.6: Customer experience and integrations
+
+**Goal:** make repeat booking and external calendar workflows practical for clients.
+
+**Scope:**
+- organization slug URLs and branding;
+- rebook and reschedule from history;
+- calendar export;
+- localization and currency display;
+- provider/customer self-service;
+- one messaging integration after email is stable;
+- webhooks for external consumers.
+
+Do not add calendar synchronization or multiple messaging providers until the organization URL and notification contracts are stable.
+
+**Done when:** a client can discover or open an organization, complete a repeat booking on mobile, and export the appointment without exposing private business data.
+
+**Commit:** `feat(web): add branded customer experience and integrations`
+
+### V2.7: Analytics and observability
+
+**Goal:** make business performance and production health measurable.
+
+**Scope:**
+- bookings, revenue, utilization, cancellations, no-shows, repeat customers, and peak-hour reports;
+- request IDs and structured logs;
+- readiness and worker health endpoints;
+- audit-log viewer;
+- failed-job monitoring;
+- deployed version display.
+
+Reporting queries belong in dedicated report modules, not booking services.
+
+**Done when:** reports are organization-scoped, timezone-aware, tested against known fixtures, and production failures can be traced to a request or job.
+
+**Commit:** `feat(analytics): add organization reports and observability`
+
+### V2 workflow and gates
+
+For every V2 phase:
+
+1. Add the phase to the current work session and confirm its file list before editing.
+2. Write domain and authorization tests before implementation where state or tenant boundaries are involved.
+3. Preserve the router -> service -> repository -> pure-domain architecture.
+4. Run `make lint test` and the relevant frontend checks.
+5. Run a code review and security review for tenant, authorization, webhook, or payment changes.
+6. Update `docs/ARCHITECTURE.md`, `docs/EDGE_CASES.md`, `docs/TESTING.md`, and `docs/AI_LOG.md` when behavior changes.
+7. Commit and deploy only from the reviewed commit.
+
+Never start V2 with payments, messaging, calendar synchronization, microservices, event sourcing, or a generic plugin system. Those depend on the organization, membership, lifecycle, and background-job foundations above.
+
+---
+
 ## 13. Edge case matrix
 
 | # | Case | Handled in | Result | Test |
