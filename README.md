@@ -21,6 +21,8 @@ The focus is correctness: **a time slot can never be booked twice**, even when m
 - [API](#api)
 - [Tests](#tests)
 - [Testing guide](docs/TESTING.md)
+- [Task requirements checklist](docs/REQUIREMENTS.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Security](#security)
 - [Deployment](#deployment)
 - [How AI was used](#how-ai-was-used)
@@ -201,7 +203,8 @@ make dev-db && make test
 - Tests run the real migrations on a separate `booking_test` database, so the database constraints are tested too.
 - Time is controlled with an injected clock, so rules like "2 hours before" and "after the end" are tested exactly.
 - Coverage: 98% of backend lines. The slot engine and the status rules are at 100%.
-- CI runs linting, type checks, migrations, tests, dependency audits and the frontend build on every push.
+- Browser end-to-end tests (Playwright) run against the full Docker stack: a client books and cancels, a slot is taken by someone else during confirmation, an admin confirms a booking. `make up && make demo && make e2e`.
+- CI runs linting, type checks, migrations, tests, dependency audits the frontend build and the end-to-end tests on every push.
 
 ## Security
 
@@ -243,3 +246,4 @@ I can explain every file and every decision in this repository.
 - Logging out clears the cookie, but a copied token stays valid until it expires (60 minutes). A server-side token denylist would close this.
 - Specialists do not have their own accounts; the business admin manages everything.
 - Admin screens for editing services, specialists and schedules are API-only for now.
+- The growth plan (multiple businesses, notifications, payments) is in [docs/ROADMAP.md](docs/ROADMAP.md).
