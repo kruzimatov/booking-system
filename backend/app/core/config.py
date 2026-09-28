@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     max_active_bookings_per_client: int = Field(default=5, ge=1)
     cancel_cutoff_minutes: int = Field(default=120, ge=0)
     currency: str = "UZS"
+    resend_api_key: str | None = None
+    notification_from_email: str = "Tashkent Grooming <bookings@veraflow.uz>"
 
     @field_validator("business_timezone")
     @classmethod

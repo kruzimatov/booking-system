@@ -112,12 +112,8 @@ class BookingRepository:
         return {
             "total": self.db.scalar(base) or 0,
             "upcoming": self.db.scalar(base.where(upcoming)) or 0,
-            "completed": self.db.scalar(
-                base.where(Booking.status == BookingStatus.COMPLETED)
-            ) or 0,
-            "cancelled": self.db.scalar(
-                base.where(Booking.status == BookingStatus.CANCELLED)
-            ) or 0,
+            "completed": self.db.scalar(base.where(Booking.status == BookingStatus.COMPLETED)) or 0,
+            "cancelled": self.db.scalar(base.where(Booking.status == BookingStatus.CANCELLED)) or 0,
         }
 
     def add(self, booking: Booking) -> None:

@@ -1,9 +1,10 @@
 import uuid
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Response, status
 
 from app.api.deps import AdminUser, ClientUser, ClockDep, DbSession, SettingsDep, require_admin
+from app.core.notifications import send_booking_email
 from app.core.schemas import BoundedDate, Page
 from app.modules.bookings.models import Booking, BookingStatus
 from app.modules.bookings.policies import Action
@@ -41,9 +42,22 @@ def to_admin_view(bookings: BookingService, viewer: User, booking: Booking) -> B
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_booking(
-    body: BookingCreate, client: ClientUser, bookings: BookingServiceDep
+    body: BookingCreate,
+    client: ClientUser,
+    bookings: BookingServiceDep,
+    bg: BackgroundTasks,
 ) -> BookingOut:
-    return to_client_view(bookings, client, bookings.create(client, body))
+    booking = bookings.create(client, body)
+    bg.add_task(
+        send_booking_email,
+        client.email,
+        booking.status,
+        client.full_name,
+        booking.service.name,
+        booking.provider.full_name,
+        booking.starts_at,
+    )
+    return to_client_view(bookings, client, booking)
 
 
 @router.get("")
@@ -92,10 +106,20 @@ def cancel_my_booking(
     booking_id: uuid.UUID,
     client: ClientUser,
     bookings: BookingServiceDep,
+    bg: BackgroundTasks,
     body: CancelRequest | None = None,
 ) -> BookingOut:
     reason = body.reason if body else None
     booking = bookings.apply(client, booking_id, Action.CANCEL, reason)
+    bg.add_task(
+        send_booking_email,
+        client.email,
+        booking.status,
+        client.full_name,
+        booking.service.name,
+        booking.provider.full_name,
+        booking.starts_at,
+    )
     return to_client_view(bookings, client, booking)
 
 
@@ -138,7 +162,19 @@ def admin_change_booking_status(
     action: Action,
     admin: AdminUser,
     bookings: BookingServiceDep,
+    bg: BackgroundTasks,
     body: CancelRequest | None = None,
 ) -> BookingAdminOut:
     reason = body.reason if body else None
-    return to_admin_view(bookings, admin, bookings.apply(admin, booking_id, action, reason))
+    booking = bookings.apply(admin, booking_id, action, reason)
+    client = booking.client
+    bg.add_task(
+        send_booking_email,
+        client.email,
+        booking.status,
+        client.full_name,
+        booking.service.name,
+        booking.provider.full_name,
+        booking.starts_at,
+    )
+    return to_admin_view(bookings, admin, booking)
