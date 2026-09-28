@@ -165,7 +165,7 @@ BOOKINGS = (
     ),
     BookingSpec(1, "Temurbek Xolmatov", "Classic haircut", "shahzod@example.com", time(10), (P, C)),
     BookingSpec(1, "Temurbek Xolmatov", "Beard shaping", "bekzod@example.com", time(11), (P,)),
-    BookingSpec(1, "Nodira Ismoilova", "Scalp massage", "client@example.com", time(14), (P,)),
+    BookingSpec(1, "Nodira Ismoilova", "Scalp massage", "lazizbek1234@gmail.com", time(14), (P,)),
     BookingSpec(2, "Farrux Ergashev", "Skin fade", "bekzod@example.com", time(17), (P, C)),
     BookingSpec(
         2,
