@@ -32,7 +32,7 @@ from app.models import (
 from app.modules.bookings.models import BookingStatus
 from app.modules.users.models import UserRole
 
-ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com")
+ADMIN_EMAIL = os.environ.get("SEED_ADMIN_EMAIL", "admin@veraflow.uz")
 # Local defaults are published in the README; they are refused on an HTTPS deployment.
 LOCAL_ADMIN_PASSWORD = "demo-admin-password"  # noqa: S105 (public local demo value)
 LOCAL_CLIENT_PASSWORD = "demo-client-password"  # noqa: S105 (public local demo value)
@@ -130,7 +130,7 @@ SPECIALISTS = (
 )
 
 CLIENTS = (
-    ClientSpec("client@example.com", "Madina Yo'ldosheva", "+998 90 111 22 33"),
+    ClientSpec("lazizbek1234@gmail.com", "Lazizbek Abdullayev", "+998 90 111 22 33"),
     ClientSpec("shahzod@example.com", "Shahzod Tursunov", "+998 93 245 67 18"),
     ClientSpec("kamola@example.com", "Kamola Saidova", None),
     ClientSpec("bekzod@example.com", "Bekzod Rahimov", "+998 97 700 12 40"),
@@ -158,7 +158,7 @@ BOOKINGS = (
         -1,
         "Sevara Mahmudova",
         "Kids haircut",
-        "client@example.com",
+        "lazizbek1234@gmail.com",
         time(12, 30),
         (P, C, D),
         notes="For my son Amir, he is 6.",
