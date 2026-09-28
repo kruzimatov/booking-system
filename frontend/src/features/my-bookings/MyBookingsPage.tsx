@@ -1,4 +1,4 @@
-import { Anchor, Button, Group, Pagination, Paper, Stack, Tabs, Text, Title } from "@mantine/core";
+import { Anchor, Button, Group, Pagination, Paper, SimpleGrid, Stack, Tabs, Text, Title } from "@mantine/core";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -8,7 +8,7 @@ import { formatDateTime, formatTime } from "../../shared/lib/datetime";
 import { formatPrice } from "../../shared/lib/money";
 import { EmptyState, ErrorState, LoadingRows } from "../../shared/ui/States";
 import { StatusBadge } from "../../shared/ui/StatusBadge";
-import { PAGE_SIZE, type Scope, useMyBookings } from "./api";
+import { PAGE_SIZE, type Scope, useMyBookings, useMyStats } from "./api";
 import { CancelButton } from "./CancelButton";
 
 function BookingList({ scope }: { scope: Scope }) {
@@ -87,6 +87,33 @@ function BookingList({ scope }: { scope: Scope }) {
   );
 }
 
+function StatsRow() {
+  const stats = useMyStats();
+  if (!stats.data) return null;
+
+  const cards = [
+    { label: "Upcoming", value: stats.data.upcoming, color: "clay" },
+    { label: "Completed", value: stats.data.completed, color: "teal" },
+    { label: "Cancelled", value: stats.data.cancelled, color: "gray" },
+    { label: "Total visits", value: stats.data.total, color: "dark" },
+  ];
+
+  return (
+    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+      {cards.map((card) => (
+        <Paper key={card.label} withBorder p="md" radius="md">
+          <Text size="xs" c="dimmed" tt="uppercase" fw={700} style={{ letterSpacing: "0.04em" }}>
+            {card.label}
+          </Text>
+          <Text size="xl" fw={700} c={card.color} mt={4}>
+            {card.value}
+          </Text>
+        </Paper>
+      ))}
+    </SimpleGrid>
+  );
+}
+
 export function MyBookingsPage() {
   usePageTitle("My bookings");
   return (
@@ -94,6 +121,7 @@ export function MyBookingsPage() {
       <Title order={1} size="h2">
         My bookings
       </Title>
+      <StatsRow />
       <Tabs defaultValue="upcoming" keepMounted={false}>
         <Tabs.List>
           <Tabs.Tab value="upcoming">Upcoming</Tabs.Tab>

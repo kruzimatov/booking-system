@@ -193,6 +193,9 @@ class BookingService:
             raise NotFoundError("Booking not found.")
         return booking
 
+    def client_stats(self, client: User) -> dict[str, int]:
+        return self.bookings.client_stats(client.id, self.clock.now())
+
     def list_own(
         self, client: User, *, scope: str, page: int, size: int
     ) -> tuple[list[Booking], int]:

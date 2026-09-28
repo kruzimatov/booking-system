@@ -3,7 +3,14 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.core.schemas import NameText, NormalizedEmail, PhoneText, RequestSchema, ResponseSchema
+from app.core.schemas import (
+    NameText,
+    NormalizedEmail,
+    PatchSchema,
+    PhoneText,
+    RequestSchema,
+    ResponseSchema,
+)
 from app.modules.users.models import UserRole
 
 
@@ -26,6 +33,18 @@ class UserOut(ResponseSchema):
     full_name: str
     phone: str | None
     role: UserRole
+
+
+class UpdateProfileRequest(PatchSchema):
+    NOT_NULL = frozenset({"full_name"})
+
+    full_name: NameText | None = None
+    phone: PhoneText | None = None
+
+
+class ChangePasswordRequest(RequestSchema):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class TokenResponse(BaseModel):

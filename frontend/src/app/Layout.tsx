@@ -34,6 +34,8 @@ export function Layout() {
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>{user.email}</Menu.Label>
+        <Menu.Item component={Link} to="/profile">Profile</Menu.Item>
+        <Menu.Divider />
         <Menu.Item onClick={() => logout.mutate(undefined, { onSuccess: () => navigate("/") })}>Log out</Menu.Item>
       </Menu.Dropdown>
     </Menu>

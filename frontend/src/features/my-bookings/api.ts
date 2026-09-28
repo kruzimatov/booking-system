@@ -6,6 +6,13 @@ import { unwrap } from "../../shared/api/errors";
 export type Scope = "upcoming" | "history";
 export const PAGE_SIZE = 10;
 
+export function useMyStats() {
+  return useQuery({
+    queryKey: ["my-stats"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/bookings/stats")),
+  });
+}
+
 export function useMyBookings(scope: Scope, page: number) {
   return useQuery({
     queryKey: ["my-bookings", scope, page],

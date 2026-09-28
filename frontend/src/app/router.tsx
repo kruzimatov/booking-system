@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 
+import { RequireAuth } from "../features/auth/RequireAuth";
 import { RequireRole } from "../features/auth/RequireRole";
 import { BookPage } from "../features/booking/BookPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
@@ -27,6 +28,17 @@ export const router = createBrowserRouter([
             path: "/bookings",
             lazy: async () => ({
               Component: (await import("../features/my-bookings/MyBookingsPage")).MyBookingsPage,
+            }),
+          },
+        ],
+      },
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            path: "/profile",
+            lazy: async () => ({
+              Component: (await import("../features/profile/ProfilePage")).ProfilePage,
             }),
           },
         ],

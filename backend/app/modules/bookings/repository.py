@@ -106,6 +106,20 @@ class BookingRepository:
             query = query.where(Booking.starts_at < starts_before)
         return self._page(query, page, size)
 
+    def client_stats(self, client_id: uuid.UUID, now: datetime) -> dict[str, int]:
+        base = select(func.count()).select_from(Booking).where(Booking.client_id == client_id)
+        upcoming = and_(Booking.status.in_(ACTIVE_STATUSES), Booking.ends_at > now)
+        return {
+            "total": self.db.scalar(base) or 0,
+            "upcoming": self.db.scalar(base.where(upcoming)) or 0,
+            "completed": self.db.scalar(
+                base.where(Booking.status == BookingStatus.COMPLETED)
+            ) or 0,
+            "cancelled": self.db.scalar(
+                base.where(Booking.status == BookingStatus.CANCELLED)
+            ) or 0,
+        }
+
     def add(self, booking: Booking) -> None:
         self.db.add(booking)
 

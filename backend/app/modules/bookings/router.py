@@ -59,6 +59,11 @@ def list_my_bookings(
     return Page(items=views, total=total, page=page, size=size)
 
 
+@router.get("/stats")
+def my_booking_stats(client: ClientUser, bookings: BookingServiceDep) -> dict[str, int]:
+    return bookings.client_stats(client)
+
+
 @router.get("/{booking_id}")
 def get_my_booking(
     booking_id: uuid.UUID, client: ClientUser, bookings: BookingServiceDep
