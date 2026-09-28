@@ -107,7 +107,9 @@ export function ConfirmStep({ service, provider, start, onSlotLost }: ConfirmSte
           </Paper>
 
           <Text size="xs" c="dimmed">
-            No upfront payment needed. Free cancellation up to 2 hours before the appointment.
+            No upfront payment needed. Free cancellation up to{" "}
+            {meta.cancel_cutoff_minutes % 60 === 0 ? `${meta.cancel_cutoff_minutes / 60} h` : `${meta.cancel_cutoff_minutes} min`} before
+            the appointment.
           </Text>
         </Stack>
       </Paper>

@@ -5,18 +5,21 @@ import type { ProviderAdmin, ServiceAdmin } from "../../shared/api/client";
 import { useMeta } from "../../shared/hooks/useMeta";
 import { formatDateTime } from "../../shared/lib/datetime";
 import { EmptyState, ErrorState, LoadingRows } from "../../shared/ui/States";
-import { useAdminProviders, useAdminServices, useProviderAvailability, useProviderTimeOff } from "./api";
+import { useWeeklyHours } from "../booking/api";
+import { useAdminProviders, useAdminServices, useProviderTimeOff } from "./api";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function SpecialistDetail({ providerId }: { providerId: string }) {
   const meta = useMeta();
-  const availability = useProviderAvailability(providerId);
+  const availability = useWeeklyHours(providerId);
   const timeOff = useProviderTimeOff(providerId);
 
   if (availability.isPending || timeOff.isPending) {
     return <LoadingRows rows={2} height={32} />;
   }
+  if (availability.isError) return <ErrorState error={availability.error} onRetry={() => void availability.refetch()} />;
+  if (timeOff.isError) return <ErrorState error={timeOff.error} onRetry={() => void timeOff.refetch()} />;
 
   const windowsByDay = (availability.data ?? []).reduce<Record<number, string[]>>((acc, win) => {
     if (!acc[win.weekday]) acc[win.weekday] = [];

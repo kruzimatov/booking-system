@@ -51,21 +51,6 @@ export function useAdminServices() {
   });
 }
 
-export function useProviderAvailability(providerId: string | null) {
-  return useQuery({
-    queryKey: ["provider-availability", providerId],
-    queryFn: async () => {
-      if (!providerId) return [];
-      return unwrap(
-        await api.GET("/api/v1/providers/{provider_id}/availability", {
-          params: { path: { provider_id: providerId } },
-        }),
-      );
-    },
-    enabled: Boolean(providerId),
-  });
-}
-
 export function useProviderTimeOff(providerId: string | null) {
   return useQuery({
     queryKey: ["provider-time-off", providerId],

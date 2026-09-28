@@ -46,72 +46,72 @@ export function AdminBookingsPage() {
         <Tabs.Panel value="bookings" pt="md">
           <Stack gap="lg">
             <StatsCards />
-      <Paper withBorder p="md" radius="md">
-        <Group align="flex-end" gap="md">
-          <SegmentedControl
-            data={STATUS_OPTIONS}
-            value={filters.status}
-            onChange={(value) => update({ status: value as Filters["status"] })}
-            aria-label="Status"
-          />
-          <Select
-            label="Specialist"
-            placeholder="Everyone"
-            clearable
-            data={(providers.data ?? []).map((provider) => ({ value: provider.id, label: provider.full_name }))}
-            value={filters.providerId}
-            onChange={(value) => update({ providerId: value })}
-            w={200}
-          />
-          <DatePickerInput
-            type="range"
-            label="Dates"
-            placeholder="Any day"
-            clearable
-            value={[filters.dateFrom, filters.dateTo]}
-            onChange={([from, to]) => update({ dateFrom: from, dateTo: to })}
-            w={260}
-          />
-        </Group>
-      </Paper>
-      {bookings.isPending && <LoadingRows rows={5} height={48} />}
-      {bookings.isError && <ErrorState error={bookings.error} onRetry={() => void bookings.refetch()} />}
-      {bookings.isSuccess && bookings.data.total === 0 && <EmptyState>No bookings match these filters.</EmptyState>}
-      {bookings.isSuccess && bookings.data.total > 0 && (
-        <Stack gap="sm">
-          <Table.ScrollContainer minWidth={760}>
-            <Table verticalSpacing="sm" highlightOnHover={false}>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>When</Table.Th>
-                  <Table.Th>Client</Table.Th>
-                  <Table.Th>Service</Table.Th>
-                  <Table.Th>Status</Table.Th>
-                  <Table.Th ta="right">Actions</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {bookings.data.items.map((booking) => (
-                  <BookingRow key={booking.id} booking={booking} />
-                ))}
-              </Table.Tbody>
-            </Table>
-          </Table.ScrollContainer>
-          <Group justify="space-between">
-            <Text size="sm" c="dimmed">
-              {bookings.data.total} booking{bookings.data.total === 1 ? "" : "s"}
-            </Text>
-            {bookings.data.total > PAGE_SIZE && (
-              <Pagination
-                total={Math.ceil(bookings.data.total / PAGE_SIZE)}
-                value={filters.page}
-                onChange={(page) => setFilters((current) => ({ ...current, page }))}
-                aria-label="Pages"
-              />
+            <Paper withBorder p="md" radius="md">
+              <Group align="flex-end" gap="md">
+                <SegmentedControl
+                  data={STATUS_OPTIONS}
+                  value={filters.status}
+                  onChange={(value) => update({ status: value as Filters["status"] })}
+                  aria-label="Status"
+                />
+                <Select
+                  label="Specialist"
+                  placeholder="Everyone"
+                  clearable
+                  data={(providers.data ?? []).map((provider) => ({ value: provider.id, label: provider.full_name }))}
+                  value={filters.providerId}
+                  onChange={(value) => update({ providerId: value })}
+                  w={200}
+                />
+                <DatePickerInput
+                  type="range"
+                  label="Dates"
+                  placeholder="Any day"
+                  clearable
+                  value={[filters.dateFrom, filters.dateTo]}
+                  onChange={([from, to]) => update({ dateFrom: from, dateTo: to })}
+                  w={260}
+                />
+              </Group>
+            </Paper>
+            {bookings.isPending && <LoadingRows rows={5} height={48} />}
+            {bookings.isError && <ErrorState error={bookings.error} onRetry={() => void bookings.refetch()} />}
+            {bookings.isSuccess && bookings.data.total === 0 && <EmptyState>No bookings match these filters.</EmptyState>}
+            {bookings.isSuccess && bookings.data.total > 0 && (
+              <Stack gap="sm">
+                <Table.ScrollContainer minWidth={760}>
+                  <Table verticalSpacing="sm" highlightOnHover={false}>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>When</Table.Th>
+                        <Table.Th>Client</Table.Th>
+                        <Table.Th>Service</Table.Th>
+                        <Table.Th>Status</Table.Th>
+                        <Table.Th ta="right">Actions</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {bookings.data.items.map((booking) => (
+                        <BookingRow key={booking.id} booking={booking} />
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Table.ScrollContainer>
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">
+                    {bookings.data.total} booking{bookings.data.total === 1 ? "" : "s"}
+                  </Text>
+                  {bookings.data.total > PAGE_SIZE && (
+                    <Pagination
+                      total={Math.ceil(bookings.data.total / PAGE_SIZE)}
+                      value={filters.page}
+                      onChange={(page) => setFilters((current) => ({ ...current, page }))}
+                      aria-label="Pages"
+                    />
+                  )}
+                </Group>
+              </Stack>
             )}
-          </Group>
-        </Stack>
-      )}
           </Stack>
         </Tabs.Panel>
 
