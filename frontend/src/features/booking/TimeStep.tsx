@@ -54,20 +54,44 @@ export function TimeStep({ providerId, serviceId, day, start, onDay, onStart }: 
           {day && slots.isSuccess && slots.data.length === 0 && (
             <EmptyState>No free time on this day. Try another date.</EmptyState>
           )}
-          {day && slots.isSuccess && slots.data.length > 0 && (
-            <SimpleGrid cols={{ base: 3, xs: 4 }} spacing="xs" role="group" aria-label="Free start times">
-              {slots.data.map((slot) => (
-                <Button
-                  key={slot.starts_at}
-                  variant={slot.starts_at === start ? "filled" : "default"}
-                  aria-pressed={slot.starts_at === start}
-                  onClick={() => onStart(slot.starts_at)}
-                >
-                  {formatTime(slot.starts_at, meta.timezone)}
-                </Button>
-              ))}
-            </SimpleGrid>
-          )}
+          {day && slots.isSuccess && slots.data.length > 0 && (() => {
+            const morning = slots.data.filter((s) => parseInt(formatTime(s.starts_at, meta.timezone).split(":")[0], 10) < 12);
+            const afternoon = slots.data.filter((s) => {
+              const h = parseInt(formatTime(s.starts_at, meta.timezone).split(":")[0], 10);
+              return h >= 12 && h < 17;
+            });
+            const evening = slots.data.filter((s) => parseInt(formatTime(s.starts_at, meta.timezone).split(":")[0], 10) >= 17);
+            const groups = [
+              { label: "Morning", items: morning },
+              { label: "Afternoon", items: afternoon },
+              { label: "Evening", items: evening },
+            ].filter((g) => g.items.length > 0);
+
+            return (
+              <Stack gap="sm" role="group" aria-label="Free start times">
+                {groups.map((group) => (
+                  <Stack key={group.label} gap={6}>
+                    <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.04em" }}>
+                      {group.label}
+                    </Text>
+                    <SimpleGrid cols={{ base: 3, xs: 4 }} spacing="xs">
+                      {group.items.map((slot) => (
+                        <Button
+                          key={slot.starts_at}
+                          variant={slot.starts_at === start ? "filled" : "default"}
+                          color={slot.starts_at === start ? "clay" : undefined}
+                          aria-pressed={slot.starts_at === start}
+                          onClick={() => onStart(slot.starts_at)}
+                        >
+                          {formatTime(slot.starts_at, meta.timezone)}
+                        </Button>
+                      ))}
+                    </SimpleGrid>
+                  </Stack>
+                ))}
+              </Stack>
+            );
+          })()}
         </Stack>
       </Grid.Col>
     </Grid>

@@ -58,6 +58,17 @@ function BookingList({ scope }: { scope: Scope }) {
                   Add to calendar
                 </Button>
               )}
+              {scope === "history" && (
+                <Button
+                  component={Link}
+                  to={`/?service=${booking.service.id}&provider=${booking.provider.id}`}
+                  variant="light"
+                  color="clay"
+                  size="xs"
+                >
+                  Book again
+                </Button>
+              )}
               <CancelButton booking={booking} />
             </Stack>
           </Group>

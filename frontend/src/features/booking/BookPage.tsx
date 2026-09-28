@@ -27,7 +27,26 @@ export function BookPage() {
         <Title order={1} size="h1" maw={620}>
           Book an appointment
         </Title>
-        <Text c="dimmed" size="lg" maw={560} mt="xs">Choose a service, a specialist and a free time.</Text>
+        <Text c="dimmed" size="lg" maw={560} mt="xs">
+          Choose a service, a specialist and a free time.
+        </Text>
+        <Group gap="xs" mt="sm" wrap="wrap">
+          <Text size="xs" c="dimmed">
+            Tashkent Grooming Studio
+          </Text>
+          <Text size="xs" c="dimmed">
+            ·
+          </Text>
+          <Text size="xs" c="dimmed">
+            Live availability
+          </Text>
+          <Text size="xs" c="dimmed">
+            ·
+          </Text>
+          <Text size="xs" c="dimmed">
+            Tashkent time (UTC+5)
+          </Text>
+        </Group>
       </div>
       <Paper className="booking-panel" withBorder p={{ base: "md", sm: "xl" }} radius="lg">
         <Stepper active={active} onStepClick={goTo} allowNextStepsSelect={false} size="sm">

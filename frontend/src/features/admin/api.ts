@@ -44,6 +44,43 @@ export function useAdminProviders() {
   });
 }
 
+export function useAdminServices() {
+  return useQuery({
+    queryKey: ["admin-services"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/admin/services")),
+  });
+}
+
+export function useProviderAvailability(providerId: string | null) {
+  return useQuery({
+    queryKey: ["provider-availability", providerId],
+    queryFn: async () => {
+      if (!providerId) return [];
+      return unwrap(
+        await api.GET("/api/v1/providers/{provider_id}/availability", {
+          params: { path: { provider_id: providerId } },
+        }),
+      );
+    },
+    enabled: Boolean(providerId),
+  });
+}
+
+export function useProviderTimeOff(providerId: string | null) {
+  return useQuery({
+    queryKey: ["provider-time-off", providerId],
+    queryFn: async () => {
+      if (!providerId) return [];
+      return unwrap(
+        await api.GET("/api/v1/admin/providers/{provider_id}/time-off", {
+          params: { path: { provider_id: providerId } },
+        }),
+      );
+    },
+    enabled: Boolean(providerId),
+  });
+}
+
 export function useChangeStatus() {
   const queryClient = useQueryClient();
   return useMutation({

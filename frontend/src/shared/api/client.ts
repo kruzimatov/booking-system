@@ -8,7 +8,11 @@ export const api = createClient<paths>({ credentials: "include" });
 
 type Schemas = components["schemas"];
 export type Service = Schemas["ServicePublic"];
+export type ServiceAdmin = Schemas["ServiceAdmin"];
 export type Provider = Schemas["ProviderPublic"];
+export type ProviderAdmin = Schemas["ProviderAdmin"];
+export type WindowOut = Schemas["WindowOut"];
+export type TimeOffOut = Schemas["TimeOffOut"];
 export type Booking = Schemas["BookingOut"];
 export type AdminBooking = Schemas["BookingAdminOut"];
 export type BookingStatus = Booking["status"];

@@ -10,6 +10,14 @@ interface ProviderStepProps {
   onSelect: (id: string) => void;
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export function ProviderStep({ serviceId, selected, onSelect }: ProviderStepProps) {
   const providers = useProvidersFor(serviceId);
 
@@ -18,11 +26,12 @@ export function ProviderStep({ serviceId, selected, onSelect }: ProviderStepProp
   if (providers.data.length === 0) return <EmptyState>Nobody offers this service at the moment.</EmptyState>;
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2 }}>
+    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
       {providers.data.map((provider) => (
         <ChoiceCard
           key={provider.id}
           title={provider.full_name}
+          avatarText={getInitials(provider.full_name)}
           subtitle={provider.bio}
           selected={provider.id === selected}
           onSelect={() => onSelect(provider.id)}

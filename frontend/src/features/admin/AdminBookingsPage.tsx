@@ -1,9 +1,11 @@
-import { Group, Pagination, Paper, SegmentedControl, Select, Stack, Table, Text, Title } from "@mantine/core";
+import { Group, Pagination, Paper, SegmentedControl, Select, Stack, Table, Tabs, Text, Title } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useState } from "react";
 
 import { usePageTitle } from "../../shared/hooks/usePageTitle";
 import { EmptyState, ErrorState, LoadingRows } from "../../shared/ui/States";
+import { AdminServicesTab } from "./AdminServicesTab";
+import { AdminSpecialistsTab } from "./AdminSpecialistsTab";
 import { type Filters, PAGE_SIZE, useAdminBookings, useAdminProviders } from "./api";
 import { BookingRow } from "./BookingRow";
 import { StatsCards } from "./StatsCards";
@@ -32,9 +34,18 @@ export function AdminBookingsPage() {
   return (
     <Stack gap="lg">
       <Title order={1} size="h2">
-        Bookings
+        Admin Workspace
       </Title>
-      <StatsCards />
+      <Tabs defaultValue="bookings" keepMounted={false}>
+        <Tabs.List>
+          <Tabs.Tab value="bookings">Bookings</Tabs.Tab>
+          <Tabs.Tab value="services">Services Catalog</Tabs.Tab>
+          <Tabs.Tab value="specialists">Specialists & Schedules</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="bookings" pt="md">
+          <Stack gap="lg">
+            <StatsCards />
       <Paper withBorder p="md" radius="md">
         <Group align="flex-end" gap="md">
           <SegmentedControl
@@ -101,6 +112,17 @@ export function AdminBookingsPage() {
           </Group>
         </Stack>
       )}
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="services" pt="md">
+          <AdminServicesTab />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="specialists" pt="md">
+          <AdminSpecialistsTab />
+        </Tabs.Panel>
+      </Tabs>
     </Stack>
   );
 }

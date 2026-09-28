@@ -15,12 +15,13 @@ export function ServiceStep({ selected, onSelect }: { selected: string | null; o
   if (services.data.length === 0) return <EmptyState>No services are available right now.</EmptyState>;
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2 }}>
+    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
       {services.data.map((service) => (
         <ChoiceCard
           key={service.id}
           title={service.name}
-          subtitle={[`${service.duration_minutes} min`, service.description].filter(Boolean).join(" · ")}
+          badge={`${service.duration_minutes} min`}
+          subtitle={service.description}
           aside={formatPrice(service.price, currency)}
           selected={service.id === selected}
           onSelect={() => onSelect(service.id)}

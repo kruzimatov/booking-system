@@ -51,16 +51,63 @@ export function ConfirmStep({ service, provider, start, onSlotLost }: ConfirmSte
     );
 
   return (
-    <Stack>
-      <Paper withBorder p="md" radius="md">
-        <Stack gap={6}>
-          <Group justify="space-between">
-            <Text fw={600}>{service.name}</Text>
-            <Text fw={600}>{formatPrice(service.price, meta.currency)}</Text>
+    <Stack gap="lg">
+      <Paper
+        withBorder
+        p="lg"
+        radius="lg"
+        style={{
+          background: "var(--booking-paper-strong)",
+          borderColor: "var(--booking-line)",
+          boxShadow: "0 4px 16px rgba(47, 40, 36, 0.05)",
+        }}
+      >
+        <Stack gap="md">
+          <Group justify="space-between" align="flex-start" wrap="nowrap">
+            <div>
+              <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.05em" }}>
+                Service
+              </Text>
+              <Text fw={700} size="lg" style={{ fontFamily: "Georgia, serif" }}>
+                {service.name}
+              </Text>
+              <Text size="sm" c="dimmed">
+                with {provider.full_name}
+              </Text>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.05em" }}>
+                Total
+              </Text>
+              <Text fw={700} size="lg" c="clay.8">
+                {formatPrice(service.price, meta.currency)}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {service.duration_minutes} min
+              </Text>
+            </div>
           </Group>
-          <Text size="sm">with {provider.full_name}</Text>
-          <Text size="sm">
-            {formatDateTime(start, meta.timezone)} – {formatTime(endsAt, meta.timezone)}
+
+          <Paper
+            p="sm"
+            radius="sm"
+            style={{
+              background: "var(--booking-wash)",
+              border: "1px solid var(--booking-line)",
+            }}
+          >
+            <Group justify="space-between" wrap="wrap">
+              <Text size="sm" fw={600}>
+                {formatDateTime(start, meta.timezone)} – {formatTime(endsAt, meta.timezone)}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {meta.timezone.replace("_", " ")} time
+              </Text>
+            </Group>
+          </Paper>
+
+          <Text size="xs" c="dimmed">
+            No upfront payment needed. Free cancellation up to 2 hours before the appointment.
           </Text>
         </Stack>
       </Paper>
