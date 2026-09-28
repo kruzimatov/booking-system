@@ -2,6 +2,6 @@ import { useEffect } from "react";
 
 export function usePageTitle(title: string): void {
   useEffect(() => {
-    document.title = `${title} · Booking`;
+    document.title = `${title} · Tashkent Grooming Studio`;
   }, [title]);
 }
