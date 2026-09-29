@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     cancel_cutoff_minutes: int = Field(default=120, ge=0)
     currency: str = "UZS"
     resend_api_key: str | None = None
-    notification_from_email: str = "Tashkent Grooming <bookings@veraflow.uz>"
+    notification_from_email: str = "Tashkent Grooming <onboarding@resend.dev>"
 
     @field_validator("business_timezone")
     @classmethod
