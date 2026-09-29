@@ -57,6 +57,27 @@ def _build_body(
     )
 
 
+def _send(to: str, subject: str, body: str) -> None:
+    settings = get_settings()
+    if not settings.resend_api_key:
+        return
+    try:
+        response = httpx.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
+            json={
+                "from": settings.notification_from_email,
+                "to": [to],
+                "subject": subject,
+                "text": body,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+    except httpx.HTTPError:
+        logger.exception("Failed to send email to %s", to)
+
+
 def send_booking_email(
     to_email: str,
     status: BookingStatus,
@@ -66,8 +87,6 @@ def send_booking_email(
     starts_at: datetime,
 ) -> None:
     settings = get_settings()
-    if not settings.resend_api_key:
-        return
     subject = SUBJECT.get(status, "Booking update")
     body = _build_body(
         status,
@@ -77,18 +96,27 @@ def send_booking_email(
         starts_at,
         settings.business_tz,
     )
-    try:
-        response = httpx.post(
-            "https://api.resend.com/emails",
-            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
-            json={
-                "from": settings.notification_from_email,
-                "to": [to_email],
-                "subject": subject,
-                "text": body,
-            },
-            timeout=10,
-        )
-        response.raise_for_status()
-    except httpx.HTTPError:
-        logger.exception("Failed to send email to %s", to_email)
+    _send(to_email, subject, body)
+
+
+def notify_admin_new_booking(
+    client_name: str,
+    client_email: str,
+    service_name: str,
+    provider_name: str,
+    starts_at: datetime,
+) -> None:
+    settings = get_settings()
+    if not settings.notification_admin_email:
+        return
+    tz = settings.business_tz
+    time_str = _format_time(starts_at, tz)
+    _send(
+        settings.notification_admin_email,
+        f"New booking: {service_name} with {provider_name}",
+        f"New booking from {client_name} ({client_email}).\n\n"
+        f"Service: {service_name}\n"
+        f"Specialist: {provider_name}\n"
+        f"Time: {time_str}\n\n"
+        "Log in to the admin panel to confirm or manage it.",
+    )

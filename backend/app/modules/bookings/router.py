@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Response, status
 
 from app.api.deps import AdminUser, ClientUser, ClockDep, DbSession, SettingsDep, require_admin
-from app.core.notifications import send_booking_email
+from app.core.notifications import notify_admin_new_booking, send_booking_email
 from app.core.schemas import BoundedDate, Page
 from app.modules.bookings.models import Booking, BookingStatus
 from app.modules.bookings.policies import Action
@@ -53,6 +53,14 @@ def create_booking(
         client.email,
         booking.status,
         client.full_name,
+        booking.service.name,
+        booking.provider.full_name,
+        booking.starts_at,
+    )
+    bg.add_task(
+        notify_admin_new_booking,
+        client.full_name,
+        client.email,
         booking.service.name,
         booking.provider.full_name,
         booking.starts_at,

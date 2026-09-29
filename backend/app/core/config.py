@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     currency: str = "UZS"
     resend_api_key: str | None = None
     notification_from_email: str = "Tashkent Grooming <bookings@booking-api.veraflow.uz>"
+    notification_admin_email: str | None = None
 
     @field_validator("business_timezone")
     @classmethod
