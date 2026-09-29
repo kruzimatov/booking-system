@@ -5,8 +5,8 @@ import { type APIRequestContext, type Page, expect, request } from "@playwright/
 
 // Local demo accounts from backend/scripts/seed.py (refused by the seed on HTTPS deployments).
 export const ACCOUNTS = {
-  admin: { email: "admin@example.com", password: process.env.E2E_ADMIN_PASSWORD ?? "demo-admin-password" },
-  madina: { email: "client@example.com", password: process.env.E2E_CLIENT_PASSWORD ?? "demo-client-password" },
+  admin: { email: "admin@veraflow.uz", password: process.env.E2E_ADMIN_PASSWORD ?? "demo-admin-password" },
+  madina: { email: "lazizbek1234@gmail.com", password: process.env.E2E_CLIENT_PASSWORD ?? "demo-client-password" },
   shahzod: { email: "shahzod@example.com", password: process.env.E2E_CLIENT_PASSWORD ?? "demo-client-password" },
 } as const;
 
