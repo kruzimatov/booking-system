@@ -36,13 +36,15 @@ The focus is correctness: **a time slot can never be booked twice**, even when m
 - Book with an optional note. Bookings start as *pending* until the business confirms them.
 - See upcoming bookings and history, and cancel up to 2 hours before the start.
 - Add a booking to Google Calendar, Apple Calendar or Outlook with one click (`.ics` download).
+- Get an email on every status change: booking received, confirmed, cancelled, completed.
 
 **Business (admin)**
 - Services, specialists, weekly working hours with breaks, and time off (via the API; see `/api/docs`).
 - A bookings dashboard: monthly numbers, a "needs action" queue, filters, and confirm / complete / cancel.
 - An audit trail for every booking: who changed its status, when, and why.
+- An email alert on every new booking, so nothing waits unnoticed in the pending queue.
 
-Bonus items from the task that are included: timezone support, calendar integration, cancellation policy, admin dashboard, tests, Docker, API documentation. Every task requirement is checked off in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
+Bonus items from the task that are included: timezone support, email notification, calendar integration, cancellation policy, admin dashboard, tests, Docker, API documentation. Every task requirement is checked off in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
 
 ## Quick start
 
@@ -63,8 +65,8 @@ Demo accounts created by the seed script on your machine (local only: the seed s
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `admin@example.com` | `demo-admin-password` |
-| Client | `client@example.com` | `demo-client-password` |
+| Admin | `admin@veraflow.uz` | `demo-admin-password` |
+| Client | `lazizbek1234@gmail.com` | `demo-client-password` |
 | Client | `shahzod@example.com` | `demo-client-password` |
 
 Without `make`: copy `.env.example` to `.env`, set `JWT_SECRET` to a random value of at least 32 characters (`openssl rand -hex 32`), run `docker compose up -d --build --wait`, then `docker compose exec api python -m scripts.seed --reset`.
@@ -173,9 +175,9 @@ Interactive documentation is at `/api/docs`. All errors use one format:
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` |
+| Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `PATCH /auth/me`, `POST /auth/change-password` |
 | Browse | `GET /services`, `GET /providers?service_id=`, `GET /providers/{id}/availability`, `GET /providers/{id}/slots?service_id=&date=` |
-| Client bookings | `POST /bookings`, `GET /bookings?scope=upcoming\|history`, `GET /bookings/{id}`, `GET /bookings/{id}/calendar.ics`, `POST /bookings/{id}/cancel` |
+| Client bookings | `POST /bookings`, `GET /bookings?scope=upcoming\|history`, `GET /bookings/stats`, `GET /bookings/{id}`, `GET /bookings/{id}/calendar.ics`, `POST /bookings/{id}/cancel` |
 | Admin | `/admin/services`, `/admin/providers` (and their availability, time off and services), `/admin/bookings`, `POST /admin/bookings/{id}/{confirm\|complete\|cancel}`, `GET /admin/stats` |
 | System | `GET /meta`, `GET /health` |
 
@@ -183,7 +185,7 @@ All paths are under `/api/v1`. A short walkthrough with curl:
 
 ```bash
 curl -c jar -X POST localhost:8081/api/v1/auth/login -H 'Content-Type: application/json' \
-  -d '{"email":"client@example.com","password":"demo-client-password"}'
+  -d '{"email":"lazizbek1234@gmail.com","password":"demo-client-password"}'
 curl localhost:8081/api/v1/services
 curl "localhost:8081/api/v1/providers/<provider_id>/slots?service_id=<service_id>&date=2026-10-05"
 curl -b jar -X POST localhost:8081/api/v1/bookings -H 'Content-Type: application/json' \
@@ -242,7 +244,7 @@ I can explain every file and every decision in this repository.
 
 ## Limitations and next steps
 
-- No email or Telegram notifications yet. Status changes are already recorded as events, which is where notifications would hook in.
+- No Telegram notifications yet; email is covered (Resend, sent on every status change to the client, and to the business on a new booking).
 - Working hours cannot cross midnight, and daylight-saving gaps are not handled specially (Tashkent has no DST).
 - Logging out clears the cookie, but a copied token stays valid until it expires (60 minutes). A server-side token denylist would close this.
 - Specialists do not have their own accounts; the business admin manages everything.
