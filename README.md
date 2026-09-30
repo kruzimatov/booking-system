@@ -61,13 +61,7 @@ make demo  # loads the demo shop (replaces all data)
 - App: http://localhost:8081
 - API documentation (Swagger): http://localhost:8081/api/docs
 
-Demo accounts created by the seed script on your machine (local only: the seed script refuses these passwords on an HTTPS deployment, where `SEED_ADMIN_PASSWORD` and `SEED_CLIENT_PASSWORD` must be set):
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@veraflow.uz` | `demo-admin-password` |
-| Client | `lazizbek1234@gmail.com` | `demo-client-password` |
-| Client | `shahzod@example.com` | `demo-client-password` |
+The seed script creates demo accounts on your machine (admin and a few clients; see `backend/scripts/seed.py` for the list). It refuses to run with these local defaults on an HTTPS deployment, where `SEED_ADMIN_PASSWORD` and `SEED_CLIENT_PASSWORD` must be set instead.
 
 Without `make`: copy `.env.example` to `.env`, set `JWT_SECRET` to a random value of at least 32 characters (`openssl rand -hex 32`), run `docker compose up -d --build --wait`, then `docker compose exec api python -m scripts.seed --reset`.
 
@@ -185,7 +179,7 @@ All paths are under `/api/v1`. A short walkthrough with curl:
 
 ```bash
 curl -c jar -X POST localhost:8081/api/v1/auth/login -H 'Content-Type: application/json' \
-  -d '{"email":"lazizbek1234@gmail.com","password":"demo-client-password"}'
+  -d '{"email":"<client-email>","password":"<client-password>"}'
 curl localhost:8081/api/v1/services
 curl "localhost:8081/api/v1/providers/<provider_id>/slots?service_id=<service_id>&date=2026-10-05"
 curl -b jar -X POST localhost:8081/api/v1/bookings -H 'Content-Type: application/json' \
